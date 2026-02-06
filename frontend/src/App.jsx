@@ -1,9 +1,15 @@
-import LandingPage from "./pages/LandingPage"
+import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Dashboard";
+import CreateSurvey from "./pages/CreateSurvey";
 
 function App() {
   return (
-    <LandingPage />
-  )
+    <>
+      {/* <LandingPage /> */}
+      {/* <Dashboard /> */}
+      <CreateSurvey />
+    </>
+  );
 }
 
-export default App
+export default App;
