@@ -1,15 +1,24 @@
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import CreateSurvey from "./pages/CreateSurvey";
+import SurveyEditor from "./pages/SurveyEditor";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
 
-function App() {
+const App = () => {
   return (
-    <>
-      {/* <LandingPage /> */}
-      {/* <Dashboard /> */}
-      <CreateSurvey />
-    </>
-  );
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/create" element={<CreateSurvey />} />
+        <Route path="/editor" element={<SurveyEditor />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App
