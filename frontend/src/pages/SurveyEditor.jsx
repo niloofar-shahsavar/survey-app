@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const SurveyEditor = () => {
   const questions = [
@@ -13,7 +14,7 @@ return (
       {/* Navbar */}
       <nav className="flex justify-between items-center px-8 py-4 bg-white border-b">
         <div className="text-2xl font-bold text-purple-900">Survii</div>
-        <button className="text-gray-500 hover:text-purple-600">← Back to Dashboard</button>
+        <Link to="/dashboard" className="text-gray-500 hover:text-purple-600">← Back to Dashboard</Link>
       </nav>
 
       {/* Main Content */}

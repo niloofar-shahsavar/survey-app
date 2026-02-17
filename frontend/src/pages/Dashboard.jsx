@@ -1,3 +1,7 @@
+import { Link } from "react-router-dom";
+
+
+
 function Dashboard() {
   const surveys = [
     { id: 1, title: "Customer Feedback", responses: 45, status: "Active" },
@@ -11,18 +15,18 @@ function Dashboard() {
         <div className="text-2xl font-bold text-purple-900">Survii</div>
         <div className="flex gap-4 items-center">
           <span className="text-gray-600">niloo@email.com</span>
-          <button className="text-gray-500 hover:text-purple-600">
+          <Link to="/" className="text-gray-500 hover:text-purple-600">
             Logout
-          </button>
+          </Link>
         </div>
       </nav>
 
       <main className="max-w-5xl mx-auto px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-800">My Surveys</h1>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+          <Link to="/create" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
             + Create New
-          </button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-8">

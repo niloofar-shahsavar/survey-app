@@ -1,4 +1,13 @@
+import { Link, useNavigate } from "react-router-dom";
+
 const Login = () => {
+    const navigate = useNavigate()
+
+    const handelSubmit = () => {
+
+        // IGEM: API CALL KOMMER HÄR
+        navigate('/dashboard')
+    }
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full px-6">
@@ -26,17 +35,20 @@ const Login = () => {
             />
           </div>
 
-          <button className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+        <button onClick={handelSubmit} className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
             Log in
           </button>
 
           <p className="text-center text-gray-500 text-sm mt-4">
-            Don't have an account? <a href="/register" className="text-purple-600 hover:underline">Sign up</a>
+            Don't have an account?{" "}
+            <Link to="/register" className="text-purple-600 hover:underline">
+              Sign up
+            </Link>
           </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

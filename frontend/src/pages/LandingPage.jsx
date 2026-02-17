@@ -1,5 +1,6 @@
 import React from "react";
 import HeroBackground from "../components/HeroBackground.jsx";
+import { Link } from "react-router-dom";
 
 const LandingPage = () => {
   return (
@@ -13,12 +14,15 @@ const LandingPage = () => {
             className="h-20"
           />
           <div className="flex gap-4">
-            <button className="px-4 py-2 text-gray-200 hover:text-purple-400 cursor-pointer">
+            <Link
+              to="/login"
+              className="px-4 py-2 text-gray-200 hover:text-purple-400"
+            >
               Log in
-            </button>
-            <button className="px-4 py-2 bg-purple-900 text-white rounded-lg hover:text-gray-800 cursor-pointer hover:bg-purple-400">
+            </Link>
+            <Link to="/register" className="px-4 py-2 bg-purple-900 text-white rounded-lg hover:text-gray-800 cursor-pointer hover:bg-purple-400">
               Sign in
-            </button>
+            </Link>
           </div>
         </nav>
 
@@ -34,9 +38,9 @@ const LandingPage = () => {
             Get insights from responses in seconds.
           </p>
 
-          <button className="px-8 py-4 bg-purple-900 text-white text-lg rounded-lg hover:bg-purple-400  hover:text-gray-800">
+          <Link to="/register" className="px-8 py-4 bg-purple-900 text-white text-lg rounded-lg hover:bg-purple-400  hover:text-gray-800">
             Get Started Free →
-          </button>
+          </Link>
         </section>
 
         <section className="px-8 py-16 bg-purple">

@@ -1,11 +1,13 @@
+import { Link } from "react-router-dom";
+
 function CreateSurvey() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="flex justify-between items-center px-8 py-4 bg-white border-b">
         <div className="text-2xl font-bold text-purple-900">Survii</div>
-        <button className="text-gray-500 hover:text-purple-600">
+        <Link to="/dashboard" className="text-gray-500 hover:text-purple-600">
           ← Back to Dashboard
-        </button>
+        </Link>
       </nav>
 
       <main className="max-w-2xl mx-auto px-8 py-12">
