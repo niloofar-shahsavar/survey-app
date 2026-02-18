@@ -1,7 +1,12 @@
 from fastapi import FastAPI
+from .database import engine
+from .models import Base
 
-app = FastAPI(title="Survey App Backend")
+app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
+
 
 @app.get("/")
-def health_check():
-    return {"status": "Backend is ready"}
+def home():
+    return {"status": "Backend Running"}
