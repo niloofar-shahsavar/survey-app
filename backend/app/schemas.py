@@ -24,3 +24,19 @@ class AnswerCreate(BaseModel):
 
 class ResponseCreate(BaseModel):
     answers: List[AnswerCreate]
+
+class TokenSchema(BaseModel):
+    access_token: str
+    token_type: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    email: str
+    
+    class Config:
+        from_attributes = True

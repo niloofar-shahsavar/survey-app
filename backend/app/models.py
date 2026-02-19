@@ -12,6 +12,7 @@ class User(Base):
     password = Column(String, nullable=False)
 
     surveys = relationship("Survey", back_populates="owner")
+    tokens = relationship("Token", back_populates="user")
 
 
 class Survey(Base):
@@ -62,3 +63,12 @@ class Answer(Base):
 
     response = relationship("Response", back_populates="answers")
     question = relationship("Question", back_populates="answers")
+
+
+class Token(Base):
+    __tablename__ = "tokens"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String, unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="tokens")

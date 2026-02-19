@@ -8,11 +8,11 @@ const LandingPage = () => {
       <HeroBackground />
       <div className="relative z-10">
         <nav className="flex justify-between items-center px-8 py-4 border-b border-gray-500">
-          <img
+          <Link to='/'><img
             src="/unnamed-2-removebg-preview.png"
             alt="Survii"
-            className="h-20"
-          />
+            className="h-20 rounded-4xl"
+          /></Link>
           <div className="flex gap-4">
             <Link
               to="/login"
@@ -47,7 +47,7 @@ const LandingPage = () => {
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-6">
               <div className="text-4xl mb-4">
-                <img src="/icon1.jpg" alt="" />
+                <img className="rounded-xl" src="/icon1.jpg" alt="" />
               </div>
               <p className="text-gray-200">
                 Describe your goal, get perfect questions instantly
@@ -55,7 +55,7 @@ const LandingPage = () => {
             </div>
             <div className="text-center p-6">
               <div className="text-4xl mb-4">
-                <img src="/icon2.jpg" alt="" />
+                <img className="rounded-xl" src="/icon2.jpg" alt="" />
               </div>
 
               <p className="text-gray-200">
@@ -64,7 +64,7 @@ const LandingPage = () => {
             </div>
             <div className="text-center p-6">
               <div className="text-4xl mb-4">
-                <img src="/icon3.jpg" alt="" />
+                <img className="rounded-xl" src="/icon3.jpg" alt="" />
               </div>
               <p className="text-gray-200">
                 Share with one link, no login required for respondents

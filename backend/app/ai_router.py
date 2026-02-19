@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 import os
 
@@ -7,8 +7,7 @@ load_dotenv()
 
 router = APIRouter()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-pro')
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 @router.post("/generate-questions")
 async def generate_questions(goal: str):
@@ -27,6 +26,9 @@ async def generate_questions(goal: str):
     Types can be: rating, text, or multiple_choice
     """
     
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt
+    )
     
     return {"questions": response.text}
