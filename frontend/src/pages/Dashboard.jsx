@@ -1,8 +1,73 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+
+        const response = await fetch("http://localhost:8001/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          localStorage.removeItem("access_token");
+          navigate("/login");
+          return;
+        }
+
+        const userData = await response.json();
+        setUser(userData);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      await fetch("http://localhost:8001/auth/logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (err) {
+      console.error("Error logging out:", err);
+    } finally {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("token_type");
+      navigate("/");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    );
+  }
+
   const surveys = [
     { id: 1, title: "Customer Feedback", responses: 45, status: "Active" },
     { id: 2, title: "Employee Survey", responses: 32, status: "Active" },
@@ -14,10 +79,12 @@ function Dashboard() {
       <nav className="flex justify-between items-center px-8 py-4 bg-white border-b">
         <div className="text-2xl font-bold text-purple-900">Survii</div>
         <div className="flex gap-4 items-center">
-          <span className="text-gray-600">niloo@email.com</span>
-          <Link to="/" className="text-gray-500 hover:text-purple-600">
+          <span className="text-gray-600">{user?.email}</span>
+          <button 
+            onClick={handleLogout}
+            className="text-gray-500 hover:text-purple-600 cursor-pointer">
             Logout
-          </Link>
+          </button>
         </div>
       </nav>
 
