@@ -1,12 +1,49 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Login = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const handelSubmit = () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
 
-        // IGEM: API CALL KOMMER HÄR
-        navigate('/dashboard')
+        try {
+            const response = await fetch("http://localhost:8001/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                setError(data.detail || "Login failed");
+                return;
+            }
+
+            const data = await response.json();
+            // Store token in localStorage
+            localStorage.setItem("access_token", data.access_token);
+            localStorage.setItem("token_type", data.token_type);
+            
+            // Navigate to dashboard
+            navigate("/dashboard");
+        } catch (err) {
+            setError("Error connecting to server");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     }
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -17,27 +54,44 @@ const Login = () => {
         </div>
 
         <div className="bg-white p-8 rounded-lg border">
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm mb-2">Email</label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:border-purple-400"
-            />
-          </div>
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm mb-2">Email</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full p-3 border rounded-lg focus:outline-none focus:border-purple-400"
+              />
+            </div>
 
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm mb-2">Password</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:border-purple-400"
-            />
-          </div>
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm mb-2">Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full p-3 border rounded-lg focus:outline-none focus:border-purple-400"
+              />
+            </div>
 
-        <button onClick={handelSubmit} className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-            Log in
-          </button>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400">
+              {loading ? "Logging in..." : "Log in"}
+            </button>
+          </form>
 
           <p className="text-center text-gray-500 text-sm mt-4">
             Don't have an account?{" "}
