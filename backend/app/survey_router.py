@@ -5,3 +5,25 @@ from sqlalchemy.orm import Session
 from .models import Survey, User
 from .schemas import SurveyCreate
 from .security import get_db, get_current_user
+
+router = APIRouter()
+
+router.post("/", status_code=201)
+def create_survey(survey: SurveyCreate, db:Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Create a new survey
+
+    #1. create survey object linked to current user
+    new_survey = Survey(
+        title=survey.title,
+        description=survey.description,
+        owner_id=current_user.id
+    )
+    # Save to database 
+
+    db.add(new_survey)
+    db.commit()
+    db.refresh(new_survey)
+
+    # 3. Return the created survey
+
+    return new_survey
