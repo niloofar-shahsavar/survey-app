@@ -7,7 +7,6 @@ from .models import User
 from .schemas import TokenSchema
 from .security import verify_password, create_database_token, get_db
 
-
 router = APIRouter()
 
 @router.post("/token", response_model=TokenSchema)
