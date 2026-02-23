@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from .database import engine
 from .models import Base
 from .ai_router import router as ai_router
-from .auth_routher import router as auth_router
+from .auth_router import router as auth_router
 
 app = FastAPI(title="Survey App Backend")
 
