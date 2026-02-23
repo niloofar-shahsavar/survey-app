@@ -27,3 +27,13 @@ def create_survey(survey: SurveyCreate, db:Session = Depends(get_db), current_us
     # 3. Return the created survey
 
     return new_survey
+
+@router.get("/")
+def get_surveys(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Get all surveys for current user
+    
+    surveys = db.execute(
+        select(Survey).where(Survey.owner_id == current_user.id)
+    ).scalars().all()
+    
+    return surveys
