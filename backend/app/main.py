@@ -4,6 +4,7 @@ from .database import engine
 from .models import Base
 # from .ai_router import router as ai_router  # Temporarily disabled for testing
 from .auth_routher import router as auth_router
+from .survey_router import router as survey_router
 
 app = FastAPI(title="Survey App Backend")
 
@@ -24,7 +25,8 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 # app.include_router(ai_router, prefix="/ai", tags=["AI"])  # Temporarily disabled for testing
-app.include_router(auth_router, prefix="/auth", tags=["auth"] )
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(survey_router, prefix="/surveys", tags=["surveys"])
 
 @app.get("/")
 def home():
