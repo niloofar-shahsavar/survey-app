@@ -17,7 +17,7 @@ router = APIRouter()
 Base.metadata.create_all(bind=engine)
 
 
-@router.post("/surveys")
+@router.post("")
 def create_survey(
     survey: SurveyCreate,
     current_user: User = Depends(get_current_user),
@@ -43,7 +43,7 @@ def create_survey(
     }
 
 
-@router.get("/surveys")
+@router.get("")
 def get_user_surveys(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -66,7 +66,7 @@ def get_user_surveys(
     ]
 
 
-@router.get("/surveys/{survey_id}")
+@router.get("/{survey_id}")
 def get_survey(
     survey_id: int,
     current_user: User = Depends(get_current_user),
@@ -106,7 +106,7 @@ def get_survey(
     }
 
 
-@router.post("/surveys/{survey_id}/questions")
+@router.post("/{survey_id}/questions")
 def add_question(
     survey_id: int,
     question: QuestionCreate,
@@ -148,7 +148,7 @@ def add_question(
     }
 
 
-@router.post("/surveys/{survey_id}/questions/batch")
+@router.post("/{survey_id}/questions/batch")
 def add_questions_batch(
     survey_id: int,
     questions: List[QuestionCreate],
@@ -196,7 +196,7 @@ def add_questions_batch(
     }
 
 
-@router.delete("/surveys/{survey_id}")
+@router.delete("/{survey_id}")
 def delete_survey(
     survey_id: int,
     current_user: User = Depends(get_current_user),
