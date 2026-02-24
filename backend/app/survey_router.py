@@ -50,3 +50,41 @@ def get_survey(survey_id: int, db: Session = Depends(get_db), current_user: User
         raise HTTPException(status_code=404, detail="Survey not found")
     
     return survey
+
+
+@router.delete("/{survey_id}")
+def delete_survey(survey_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Get one survey by ID, delete a survey
+    
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+    
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    
+    db.delete(survey) 
+    db.commit()
+
+    # db.delete(survey) 
+    # db.commit()  SQLAlchemy methods to delete and commit in database.
+    
+    return None
+
+@router.put("/{survey_id}")
+def update_survey(survey_id: int, survey_data: SurveyCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+
+    if not survey:
+        raise HTTPException(status_code=404, details="Survey not found")
+    survey.title = survey_data.title
+    survey.description = survey_data.description
+
+    db.commit()
+    db.refresh(survey)
+
+    return survey
+
