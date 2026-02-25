@@ -20,6 +20,7 @@ function CreateSurvey() {
         return;
       }
 
+      // Create survey
       const response = await fetch("http://localhost:8000/surveys/", {
         method: "POST",
         headers: {
@@ -35,10 +36,13 @@ function CreateSurvey() {
       if (!response.ok) {
         const data = await response.json();
         setError(data.detail || "Failed to create survey");
+        return;
       }
 
-      const survey = await response.json();
-      navigate(`/editor/${survey.id}`);
+      const surveyData = await response.json();
+
+      // Redirect to survey editor with the new survey ID
+      navigate(`/editor/${surveyData.id}`);
     } catch (err) {
       setError("Error connecting to server");
       console.error(err);
@@ -83,6 +87,17 @@ function CreateSurvey() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
+              className="w-full h-32 p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Description (optional)
+            </label>
+            <textarea
+              placeholder="e.g., I want to understand customer satisfaction..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full h-32 p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
             />
           </div>
