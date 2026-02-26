@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from .database import engine
 from .models import Base, User
 from .schemas import UserCreate, UserLogin, TokenSchema, UserOut
@@ -13,12 +12,10 @@ from .security import (
     get_current_user,
 )
 
-
 router = APIRouter()
 
 # Create tables
 Base.metadata.create_all(bind=engine)
-
 
 @router.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -49,7 +46,6 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     
     return db_user
-
 
 @router.post("/login", response_model=TokenSchema)
 def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
@@ -82,14 +78,12 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
         "token_type": "bearer"
     }
 
-
 @router.get("/profile", response_model=UserOut)
 def get_profile(current_user: User = Depends(get_current_user)):
     """
     Get current user profile
     """
     return current_user
-
 
 @router.post("/logout")
 def logout(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

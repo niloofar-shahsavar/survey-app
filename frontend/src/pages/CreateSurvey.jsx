@@ -8,28 +8,28 @@ function CreateSurvey() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleCreateSurvey = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
       const token = localStorage.getItem("access_token");
       if (!token) {
-        navigate("/login");
+        navigate("/Login");
         return;
       }
 
       // Create survey
-      const response = await fetch("http://localhost:8001/surveys", {
+      const response = await fetch("http://localhost:8000/surveys/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          title: title || "Untitled Survey",
-          description: description,
+          title,
+          description,
         }),
       });
 
@@ -40,11 +40,11 @@ function CreateSurvey() {
       }
 
       const surveyData = await response.json();
-      
+
       // Redirect to survey editor with the new survey ID
-      navigate(`/survey-editor?id=${surveyData.id}`);
+      navigate(`/editor/${surveyData.id}`);
     } catch (err) {
-      setError("Error creating survey");
+      setError("Error connecting to server");
       console.error(err);
     } finally {
       setLoading(false);
@@ -65,55 +65,50 @@ function CreateSurvey() {
           Create New Survey
         </h1>
         <p className="text-gray-500 mb-8">
-          Create a survey to gather feedback and insights.
+          Give your survey a title and description.
         </p>
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
 
-        <div className="bg-white p-6 rounded-lg border">
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleCreateSurvey}>
-            <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">
-                Survey Title
-              </label>
-              <input
-                type="text"
-                placeholder="e.g., Customer Feedback Survey"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium mb-2">
-                Description (Optional)
-              </label>
-              <textarea
-                placeholder="Describe the purpose of this survey..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full h-32 p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
-            >
-              {loading ? "Creating Survey..." : "Create Survey"}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center text-gray-400 text-sm mt-4">
-          You can add questions after creating the survey
-        </p>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 rounded-lg border"
+        >
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Survey Title
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., Customer Satisfaction Survey"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              className="w-full h-32 p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Description (optional)
+            </label>
+            <textarea
+              placeholder="e.g., I want to understand customer satisfaction..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full h-32 p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading || !title}
+            className="w-full mt-4 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            {loading ? "Creating..." : "Create Survey"}
+          </button>
+        </form>
       </main>
     </div>
   );

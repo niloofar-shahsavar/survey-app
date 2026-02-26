@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from .database import SessionLocal
 from .models import Token, User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token") 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login") 
 # this part tells fast api to look for token in auth 
 
 
