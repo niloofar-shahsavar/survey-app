@@ -33,7 +33,7 @@ const LandingPage = () => {
         </nav>
 
         <section className="relative px-8 py-24 text-center h-screen ">
-          <h1 className="text-5xl font-bold text-gray-100 mt-60 text-8xl">
+          <h1 className="text-8xl font-bold text-gray-100 mt-60">
             Welcome
           </h1>
           <h2 className="text-5xl font-bold text-gray-100 mb-6 mt-10">

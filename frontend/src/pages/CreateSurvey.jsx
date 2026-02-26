@@ -50,6 +50,8 @@ function CreateSurvey() {
       setLoading(false);
     }
   };
+
+  return (
     <div className="min-h-screen bg-gray-50">
       <nav className="flex justify-between items-center px-8 py-4 bg-white border-b">
         <div className="text-2xl font-bold text-purple-900">Survii</div>

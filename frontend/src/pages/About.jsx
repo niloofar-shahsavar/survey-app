@@ -104,7 +104,7 @@ const About = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="text-center">
-                <div className="w-32 h-32 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mx-auto mb-4"></div>
+                <div className="w-32 h-32 bg-linear-to-r from-purple-500 to-pink-500 rounded-full mx-auto mb-4"></div>
                 <h3 className="text-2xl font-bold text-gray-100 mb-2">Niloo</h3>
                 <p className="text-purple-400 mb-2">Co-Founder</p>
                 <p className="text-gray-300">
@@ -112,7 +112,7 @@ const About = () => {
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-32 h-32 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full mx-auto mb-4"></div>
+                <div className="w-32 h-32 bg-linear-to-r from-pink-500 to-purple-500 rounded-full mx-auto mb-4"></div>
                 <h3 className="text-2xl font-bold text-gray-100 mb-2">Karishma</h3>
                 <p className="text-purple-400 mb-2">Co-Founder</p>
                 <p className="text-gray-300">

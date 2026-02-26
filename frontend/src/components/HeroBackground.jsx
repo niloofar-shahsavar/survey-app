@@ -1,7 +1,7 @@
 const HeroBackground = () => {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900" />
+      <div className="absolute inset-0 bg-linear-to-br from-gray-900 via-black to-gray-900" />
 
       <div className="absolute inset-0">
         <div
