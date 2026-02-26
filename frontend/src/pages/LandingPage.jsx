@@ -26,14 +26,14 @@ const LandingPage = () => {
           </div>
         </nav>
 
-        <section className="relative px-8 py-24 text-center h-screen ">
-          <h1 className="text-5xl font-bold text-gray-100 mt-60 text-8xl">
+        <section className="relative px-8 text-center">
+          <h1 className="text-6xl font-bold text-gray-100 mt-30">
             Welcome
           </h1>
-          <h2 className="text-5xl font-bold text-gray-100 mb-6 mt-10">
+          <h2 className="text-4xl font-bold text-gray-100 mb-6 mt-10">
             Create Surveys with AI
           </h2>
-          <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-200 mb-12 max-w-2xl mx-auto">
             Describe your goal and let AI generate the perfect survey questions.
             Get insights from responses in seconds.
           </p>
@@ -42,11 +42,13 @@ const LandingPage = () => {
             Get Started Free →
           </Link>
         </section>
+        <section><div className="flex flex-cols-1 md:flex-row items-center justify-center mt-24"><div className="border border-gray-500 mx-12 my-12 h-86 w-86 rounded-lg"></div>
+        <div className="border border-gray-500 mx-12 my-12 h-86 w-86 rounded-lg"></div></div></section>
 
         <section className="px-8 py-16 bg-purple">
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="text-4xl mb-4">
+          <div className="max-w-5xl mx-auto grid grid-cols-3 md:grid-cols-3 md:gap-8">
+            <div className="text-center md:p-6">
+              <div className="flex justify-center p-2 mb-4">
                 <img className="rounded-xl" src="/icon1.jpg" alt="" />
               </div>
               <p className="text-gray-200">

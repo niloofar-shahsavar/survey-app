@@ -46,8 +46,24 @@ const Register = () => {
         return;
       }
 
+      // Registration successful, now auto-login
+      const loginResponse = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (loginResponse.ok) {
+        const loginData = await loginResponse.json();
+        localStorage.setItem("access_token", loginData.access_token);
+        navigate("/dashboard");
+      } else {
+        // If auto-login fails, go to login page
+        navigate("/login");
+      }
       // Registration successful, redirect to login
-      navigate("/login");
     } catch (err) {
       setError("Error connecting to server");
       console.error(err);
@@ -90,7 +106,9 @@ const Register = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm mb-2">Email</label>
+                <label className="block text-gray-700 text-sm mb-2">
+                  Email
+                </label>
                 <input
                   type="email"
                   placeholder="you@example.com"
