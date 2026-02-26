@@ -57,9 +57,12 @@ const Register = () => {
   };
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="flex justify-between items-center px-8 py-4">
-        <Link to="/" className="text-gray-500 hover:text-purple-600 px-8 py-4">
+      <nav className="flex justify-between items-center px-8 py-4 border-b">
+        <Link to="/" className="text-purple-900 font-bold text-lg hover:text-purple-600">
           ← Back
+        </Link>
+        <Link to="/about" className="text-gray-600 hover:text-purple-600">
+          About
         </Link>
       </nav>
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

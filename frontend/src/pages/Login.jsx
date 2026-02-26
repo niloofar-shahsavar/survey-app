@@ -46,7 +46,16 @@ const Login = () => {
         }
     }
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50">
+      <nav className="flex justify-between items-center px-8 py-4 border-b">
+        <Link to="/" className="text-purple-900 font-bold text-lg hover:text-purple-600">
+          ← Back
+        </Link>
+        <Link to="/about" className="text-gray-600 hover:text-purple-600">
+          About
+        </Link>
+      </nav>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center -mt-20">
       <div className="max-w-md w-full px-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-purple-900">Survii</h1>
