@@ -5,6 +5,7 @@ import SurveyEditor from "./pages/SurveyEditor";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import About from "./pages/About";
+import ContactUs from "./pages/ContactUs";
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 
 const App = () => {
@@ -13,6 +14,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />

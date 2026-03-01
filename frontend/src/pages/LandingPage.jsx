@@ -15,12 +15,6 @@ const LandingPage = () => {
           /></Link>
           <div className="flex gap-4">
             <Link
-              to="/about"
-              className="px-4 py-2 text-gray-200 hover:text-purple-400"
-            >
-              About
-            </Link>
-            <Link
               to="/login"
               className="px-4 py-2 text-gray-200 hover:text-purple-400"
             >
@@ -32,27 +26,29 @@ const LandingPage = () => {
           </div>
         </nav>
 
-        <section className="relative px-8 py-24 text-center h-screen ">
-          <h1 className="text-8xl font-bold text-gray-100 mt-60">
+        <section className="relative px-8 text-center">
+          <h1 className="text-6xl font-bold text-gray-100 mt-30">
             Welcome
           </h1>
-          <h2 className="text-5xl font-bold text-gray-100 mb-6 mt-10">
+          <h2 className="text-4xl font-bold text-gray-100 mb-6 mt-10">
             Create Surveys with AI
           </h2>
-          <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-200 mb-12 max-w-2xl mx-auto">
             Describe your goal and let AI generate the perfect survey questions.
             Get insights from responses in seconds.
           </p>
 
-          <Link to="/register" className="px-8 py-4 bg-purple-900 text-white text-lg rounded-lg hover:bg-purple-400  hover:text-gray-800">
+          <Link to="/register" className="px-8 py-4 bg-purple-900 text-white text-lg rounded-lg hover:bg-purple-400 hover:text-gray-800">
             Get Started Free →
           </Link>
         </section>
+        <section><div className="flex flex-cols-1 md:flex-row items-center justify-center mt-24"><div className="border border-gray-500 mx-12 my-12 h-86 w-86 rounded-lg"></div>
+        <div className="border border-gray-500 mx-12 my-12 h-86 w-86 rounded-lg"></div></div></section>
 
         <section className="px-8 py-16 bg-purple">
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="text-4xl mb-4">
+          <div className="max-w-5xl mx-auto grid grid-cols-3 md:grid-cols-3 md:gap-8">
+            <div className="text-center md:p-6">
+              <div className="flex justify-center p-2 mb-4">
                 <img className="rounded-xl" src="/icon1.jpg" alt="" />
               </div>
               <p className="text-gray-200">
