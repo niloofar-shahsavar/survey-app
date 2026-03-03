@@ -3,8 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from typing import List
 
-from .models import Survey, Question, User
-from .schemas import SurveyCreate, QuestionCreate
+from .models import Survey, Question, User, Response, Answer
+from .schemas import SurveyCreate, QuestionCreate, SurveyResponseSubmit
 from .security import get_db, get_current_user
 
 router = APIRouter()
@@ -120,3 +120,54 @@ def add_questions_batch(survey_id: int, questions: List[QuestionCreate], db: Ses
     
     db.commit()
     return {"survey_id": survey_id, "questions": created_questions}
+
+
+# PUBLIC ENDPOINTS FOR RESPONDENTS (NO AUTH REQUIRED)
+
+@router.get("/public/{survey_id}")
+def get_survey_public(survey_id: int, db: Session = Depends(get_db)):
+    # Get survey with questions for public respondents (no auth required)
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id)
+    ).scalars().first()
+    
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    
+    return {
+        "id": survey.id,
+        "title": survey.title,
+        "description": survey.description,
+        "questions": [{"id": q.id, "text": q.text} for q in survey.questions]
+    }
+
+
+@router.post("/public/{survey_id}/submit")
+def submit_survey_response(survey_id: int, response_data: SurveyResponseSubmit, db: Session = Depends(get_db)):
+    # Submit survey response from public respondent (no auth required)
+    
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id)
+    ).scalars().first()
+    
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    
+    # Create response record
+    new_response = Response(survey_id=survey_id)
+    db.add(new_response)
+    db.flush()
+    
+    # Add answers
+    for answer in response_data.answers:
+        new_answer = Answer(
+            response_id=new_response.id,
+            question_id=answer.question_id,
+            answer_text=answer.answer_text
+        )
+        db.add(new_answer)
+    
+    db.commit()
+    db.refresh(new_response)
+    
+    return {"id": new_response.id, "message": "Response submitted successfully"}
