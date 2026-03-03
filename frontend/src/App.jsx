@@ -18,7 +18,7 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create" element={<CreateSurvey />} />
         <Route path="/survey-editor" element={<SurveyEditor />} />
-        <Route path="/editor" element={<SurveyEditor />} />
+        <Route path="/editor/:surveyId" element={<SurveyEditor />} />
       </Routes>
     </BrowserRouter>
   )

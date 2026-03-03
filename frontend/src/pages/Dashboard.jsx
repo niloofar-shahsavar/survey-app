@@ -128,7 +128,8 @@ function Dashboard() {
         ) : (
           <div className="space-y-3">
             {surveys.map((survey) => (
-              <div
+              <Link
+              to={`/editor/${survey.id}`}
                 key={survey.id}
                 className="bg-white p-5 rounded-lg border flex justify-between items-center hover:border-purple-300 hover:shadow-sm cursor-pointer transition"
               >
@@ -141,7 +142,7 @@ function Dashboard() {
                   </p>
                 </div>
                 <div className="text-purple-400">→</div>
-              </div>
+               </Link>
             ))}
           </div>
         )}
