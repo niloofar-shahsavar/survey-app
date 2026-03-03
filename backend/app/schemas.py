@@ -40,3 +40,8 @@ class UserOut(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+# For public survey response submission
+class SurveyResponseSubmit(BaseModel):
+    answers: List[AnswerCreate]
