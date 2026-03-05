@@ -24,7 +24,7 @@ const SurveyEditor = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -57,7 +57,7 @@ const SurveyEditor = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ text: newQuestion }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -67,6 +67,27 @@ const SurveyEditor = () => {
       }
     } catch (err) {
       console.error("Error adding question:", err);
+    }
+  };
+
+  const handleDeleteQuestion = async (questionId) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(
+        `http://localhost:8000/surveys/${surveyId}/questions/${questionId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        setQuestions(questions.filter((q) => q.id !== questionId));
+      }
+    } catch (err) {
+      console.error("Error deleting question:", err);
     }
   };
 
@@ -133,7 +154,7 @@ const SurveyEditor = () => {
                   <button className="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100">
                     Edit
                   </button>
-                  <button className="px-3 py-1 text-sm text-red-500 border border-red-200 rounded hover:bg-red-50">
+                  <button onClick={() => handleDeleteQuestion(question.id)} className="px-3 py-1 text-sm text-red-500 border border-red-200 rounded hover:bg-red-50">
                     Delete
                   </button>
                 </div>

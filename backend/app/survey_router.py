@@ -121,6 +121,26 @@ def add_questions_batch(survey_id: int, questions: List[QuestionCreate], db: Ses
     db.commit()
     return {"survey_id": survey_id, "questions": created_questions}
 
+@router.delete("/{survey_id}/questions/{question_id}", status_code=204)
+def delete_question(survey_id: int, question_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Delete a question from survey
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+    
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    
+    question = db.execute(
+        select(Question).where(Question.id == question_id, Question.survey_id == survey_id)
+    ).scalars().first()
+    
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    db.delete(question)
+    db.commit()
+    return None
 
 # PUBLIC ENDPOINTS FOR RESPONDENTS (NO AUTH REQUIRED)
 
