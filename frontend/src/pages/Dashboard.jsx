@@ -6,6 +6,8 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [surveyToDelete, setSurveyToDelete] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -70,6 +72,36 @@ function Dashboard() {
     }
   };
 
+  const openDeleteModal = (e, survey) => {
+    e.preventDefault();
+    setSurveyToDelete(survey);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteSurvey = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(
+        `http://localhost:8000/surveys/${surveyToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        setSurveys(surveys.filter((s) => s.id !== surveyToDelete.id));
+      }
+    } catch (err) {
+      console.error("Error deleting survey:", err);
+    } finally {
+      setShowDeleteModal(false);
+      setSurveyToDelete(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -129,24 +161,64 @@ function Dashboard() {
           <div className="space-y-3">
             {surveys.map((survey) => (
               <Link
-              to={`/editor/${survey.id}`}
+                to={`/editor/${survey.id}`}
                 key={survey.id}
-                className="bg-white p-5 rounded-lg border flex justify-between items-center hover:border-purple-300 hover:shadow-sm cursor-pointer transition"
+                className="bg-white p-5 rounded-lg border flex justify-between items-center hover:border-purple-300 hover:shadow-sm cursor-pointer transition group"
               >
-                <div>
-                  <h3 className="font-semibold text-gray-800">
+                <div className="flex-1 min-w-0 mr-4">
+                  <h3 className="font-semibold text-gray-800 truncate">
                     {survey.title}
                   </h3>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 text-sm truncate">
                     {survey.description || "No description"}
                   </p>
                 </div>
-                <div className="text-purple-400">→</div>
-               </Link>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSurveyToDelete(survey);
+                      setShowDeleteModal(true);
+                    }}
+                    className="px-3 py-1 text-sm text-red-500 border border-red-200 rounded hover:bg-red-50"
+                  >
+                    Delete
+                  </button>
+                  <div className="text-purple-400">→</div>
+                </div>
+              </Link>
             ))}
           </div>
         )}
       </main>
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-transparent backdrop-blur-[2px] flex items-center justify-center z-50">
+          <div className="bg-white border p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Delete Survey
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete "{surveyToDelete?.title}"? This
+              action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteSurvey}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
