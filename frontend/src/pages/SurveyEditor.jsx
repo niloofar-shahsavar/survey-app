@@ -10,6 +10,7 @@ const SurveyEditor = () => {
   const [newQuestion, setNewQuestion] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -122,6 +123,13 @@ const SurveyEditor = () => {
     }
   };
 
+  const handleShareLink = () => {
+    const link = `${window.location.origin}/survey/${surveyId}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -150,8 +158,11 @@ const SurveyEditor = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100">
-              Save Draft
+            <button
+              onClick={handleShareLink}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100"
+            >
+              {copied ? "Copied!" : "Share Link"}
             </button>
             <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
               Publish
