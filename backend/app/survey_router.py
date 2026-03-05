@@ -142,6 +142,29 @@ def delete_question(survey_id: int, question_id: int, db: Session = Depends(get_
     db.commit()
     return None
 
+@router.put("/{survey_id}/questions/{question_id}")
+def update_question(survey_id: int, question_id: int, question_data: QuestionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Update a question
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+    
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    
+    question = db.execute(
+        select(Question).where(Question.id == question_id, Question.survey_id == survey_id)
+    ).scalars().first()
+    
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    question.text = question_data.text
+    db.commit()
+    db.refresh(question)
+    
+    return {"id": question.id, "text": question.text, "survey_id": question.survey_id}
+
 # PUBLIC ENDPOINTS FOR RESPONDENTS (NO AUTH REQUIRED)
 
 @router.get("/public/{survey_id}")

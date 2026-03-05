@@ -8,6 +8,8 @@ const SurveyEditor = () => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newQuestion, setNewQuestion] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -91,6 +93,35 @@ const SurveyEditor = () => {
     }
   };
 
+  const handleEditQuestion = async (questionId) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(
+        `http://localhost:8000/surveys/${surveyId}/questions/${questionId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ text: editText }),
+        },
+      );
+
+      if (response.ok) {
+        setQuestions(
+          questions.map((q) =>
+            q.id === questionId ? { ...q, text: editText } : q,
+          ),
+        );
+        setEditingId(null);
+        setEditText("");
+      }
+    } catch (err) {
+      console.error("Error editing question:", err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -128,40 +159,69 @@ const SurveyEditor = () => {
           </div>
         </div>
 
-        {questions.length === 0 ? (
-          <div className="bg-white p-8 rounded-lg border text-center">
-            <p className="text-gray-500">
-              No questions yet. Add your first question!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {questions.map((question, index) => (
-              <div
-                key={question.id}
-                className="bg-white p-4 rounded-lg border flex justify-between items-center group"
-              >
+        {questions.map((question, index) => (
+          <div
+            key={question.id}
+            className="bg-white p-4 rounded-lg border flex justify-between items-center"
+          >
+            {editingId === question.id ? (
+              <div className="flex-1 mr-4">
+                <input
+                  type="text"
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:border-purple-400"
+                />
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => handleEditQuestion(question.id)}
+                    className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingId(null);
+                      setEditText("");
+                    }}
+                    className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
                 <div className="flex gap-3 items-start flex-1">
-                  <span className="text-gray-300 mt-1 cursor-grab">⋮⋮</span>
-                  <div className="flex-1">
-                    <p className="text-sm text-purple-500 font-medium mb-1">
+                  <span className="text-gray-400 mt-1">⋮⋮</span>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">
                       Question {index + 1}
                     </p>
                     <p className="text-gray-800">{question.text}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100">
+                  <button
+                    onClick={() => {
+                      setEditingId(question.id);
+                      setEditText(question.text);
+                    }}
+                    className="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
+                  >
                     Edit
                   </button>
-                  <button onClick={() => handleDeleteQuestion(question.id)} className="px-3 py-1 text-sm text-red-500 border border-red-200 rounded hover:bg-red-50">
+                  <button
+                    onClick={() => handleDeleteQuestion(question.id)}
+                    className="px-3 py-1 text-sm text-red-500 border border-red-200 rounded hover:bg-red-50"
+                  >
                     Delete
                   </button>
                 </div>
-              </div>
-            ))}
+              </>
+            )}
           </div>
-        )}
+        ))}
 
         <div className="mt-4 bg-white p-4 rounded-lg border">
           <input
