@@ -77,34 +77,29 @@ function CreateSurvey() {
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded-lg border"
         >
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Survey Title
-            </label>
+          <div className="mb-6">
             <input
               type="text"
-              placeholder="e.g., Customer Satisfaction Survey"
+              placeholder="Survey Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full h-32 p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+              className="w-full text-2xl font-bold p-3 text-gray-600 border rounded-lg focus:outline-none focus:border-purple-400 placeholder-gray-300"
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Description (optional)
-            </label>
+          <div className="mb-6">
             <textarea
-              placeholder="e.g., I want to understand customer satisfaction..."
+              placeholder="Add a description (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full h-32 p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+              className="w-full p-3 text-gray-600 border rounded-lg focus:outline-none focus:border-purple-400 placeholder-gray-400 resize-none"
+              rows="3"
             />
           </div>
           <button
             type="submit"
             disabled={loading || !title}
-            className="w-full mt-4 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
           >
             {loading ? "Creating..." : "Create Survey"}
           </button>

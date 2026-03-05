@@ -24,7 +24,7 @@ const SurveyEditor = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          },
+          }
         );
 
         if (!response.ok) {
@@ -45,13 +45,30 @@ const SurveyEditor = () => {
     fetchSurvey();
   }, [surveyId, navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
-      </div>
-    );
-  }
+  const handleAddQuestion = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(
+        `http://localhost:8000/surveys/${surveyId}/questions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ text: newQuestion }),
+        }
+      );
+
+      if (response.ok) {
+        const question = await response.json();
+        setQuestions([...questions, question]);
+        setNewQuestion("");
+      }
+    } catch (err) {
+      console.error("Error adding question:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -63,7 +80,6 @@ const SurveyEditor = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
       <nav className="flex justify-between items-center px-8 py-4 bg-white border-b">
         <div className="text-2xl font-bold text-purple-900">Survii</div>
         <Link to="/dashboard" className="text-gray-500 hover:text-purple-600">
@@ -71,9 +87,7 @@ const SurveyEditor = () => {
         </Link>
       </nav>
 
-      {/* Main Content */}
       <main className="max-w-3xl mx-auto px-8 py-8">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
@@ -93,7 +107,6 @@ const SurveyEditor = () => {
           </div>
         </div>
 
-        {/* Questions List */}
         {questions.length === 0 ? (
           <div className="bg-white p-8 rounded-lg border text-center">
             <p className="text-gray-500">
@@ -105,23 +118,23 @@ const SurveyEditor = () => {
             {questions.map((question, index) => (
               <div
                 key={question.id}
-                className="bg-white p-4 rounded-lg border flex justify-between items-center"
+                className="bg-white p-4 rounded-lg border flex justify-between items-center group"
               >
-                <div className="flex gap-3 items-start">
-                  <span className="text-gray-400 mt-1">⋮⋮</span>
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">
+                <div className="flex gap-3 items-start flex-1">
+                  <span className="text-gray-300 mt-1 cursor-grab">⋮⋮</span>
+                  <div className="flex-1">
+                    <p className="text-sm text-purple-500 font-medium mb-1">
                       Question {index + 1}
                     </p>
                     <p className="text-gray-800">{question.text}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="text-gray-400 hover:text-purple-600">
-                    ✏️
+                  <button className="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100">
+                    Edit
                   </button>
-                  <button className="text-gray-400 hover:text-red-500">
-                    🗑️
+                  <button className="px-3 py-1 text-sm text-red-500 border border-red-200 rounded hover:bg-red-50">
+                    Delete
                   </button>
                 </div>
               </div>
@@ -129,10 +142,22 @@ const SurveyEditor = () => {
           </div>
         )}
 
-        {/* Add Question */}
-        <button className="w-full mt-4 p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-purple-400 hover:text-purple-600">
-          + Add Question
-        </button>
+        <div className="mt-4 bg-white p-4 rounded-lg border">
+          <input
+            type="text"
+            placeholder="Type your question here..."
+            value={newQuestion}
+            onChange={(e) => setNewQuestion(e.target.value)}
+            className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+          />
+          <button
+            onClick={handleAddQuestion}
+            disabled={!newQuestion.trim()}
+            className="w-full mt-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
+          >
+            + Add Question
+          </button>
+        </div>
       </main>
     </div>
   );
