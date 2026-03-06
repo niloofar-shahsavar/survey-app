@@ -164,6 +164,12 @@ const SurveyEditor = () => {
             >
               {copied ? "Copied!" : "Share Link"}
             </button>
+            <Link
+              to={`/results/${surveyId}`}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100"
+            >
+              View Results
+            </Link>
             <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
               Publish
             </button>

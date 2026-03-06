@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import About from "./pages/About";
 import ContactUs from "./pages/ContactUs";
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import Results from "./pages/Results";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/create" element={<CreateSurvey />} />
         <Route path="/editor/:surveyId" element={<SurveyEditor />} />
         <Route path="/survey/:surveyId" element={<SurveyResponse />} />
+        <Route path="/results/:surveyId" element={<Results />} />
       </Routes>
     </BrowserRouter>
   )
