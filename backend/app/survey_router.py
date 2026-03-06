@@ -214,3 +214,44 @@ def submit_survey_response(survey_id: int, response_data: SurveyResponseSubmit, 
     db.refresh(new_response)
     
     return {"id": new_response.id, "message": "Response submitted successfully"}
+
+
+@router.get("/{survey_id}/responses")
+def get_survey_responses(survey_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Get all responses for a survey (only for owner)
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+    
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    
+    responses = db.execute(
+        select(Response).where(Response.survey_id == survey_id)
+    ).scalars().all()
+    
+    formatted_responses = []
+    for response in responses:
+        answers = db.execute(
+            select(Answer).where(Answer.response_id == response.id)
+        ).scalars().all()
+        
+        formatted_responses.append({
+            "id": response.id,
+            "answers": [
+                {
+                    "id": ans.id,
+                    "question_id": ans.question_id,
+                    "answer_text": ans.answer_text,
+                    "question_text": db.execute(
+                        select(Question).where(Question.id == ans.question_id)
+                    ).scalars().first().text
+                } for ans in answers
+            ]
+        })
+    
+    return {
+        "survey_id": survey_id,
+        "total_responses": len(responses),
+        "responses": formatted_responses
+    }
