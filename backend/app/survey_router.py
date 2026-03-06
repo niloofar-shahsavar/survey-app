@@ -47,7 +47,7 @@ def get_survey(survey_id: int, db: Session = Depends(get_db), current_user: User
         "id": survey.id,
         "title": survey.title,
         "description": survey.description,
-        "questions": [{"id": q.id, "text": q.text} for q in survey.questions]
+        "questions": [{"id": q.id, "text": q.text, "type": q.type} for q in survey.questions]
     }
 
 
@@ -93,12 +93,12 @@ def add_question(survey_id: int, question: QuestionCreate, db: Session = Depends
     if not survey:
         raise HTTPException(status_code=404, detail="Survey not found")
     
-    db_question = Question(text=question.text, survey_id=survey_id)
+    db_question = Question(text=question.text, type=question.type, survey_id=survey_id)
     db.add(db_question)
     db.commit()
     db.refresh(db_question)
     
-    return {"id": db_question.id, "text": db_question.text, "survey_id": db_question.survey_id}
+    return {"id": db_question.id, "text": db_question.text, "type": db_question.type, "survey_id": db_question.survey_id}
 
 
 @router.post("/{survey_id}/questions/batch")

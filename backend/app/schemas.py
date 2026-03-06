@@ -15,6 +15,7 @@ class SurveyCreate(BaseModel):
 
 class QuestionCreate(BaseModel):
     text: str
+    type: str = "text"
 
 
 class AnswerCreate(BaseModel):
