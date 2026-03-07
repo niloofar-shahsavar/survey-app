@@ -17,11 +17,11 @@ const About = () => {
             />
           </Link>
           <div className="flex gap-4">
-            <Link
-              to="/about"
+              <Link
+              to="/contact"
               className="px-4 py-2 text-gray-200 hover:text-purple-400"
             >
-              About
+              Contact
             </Link>
             <Link
               to="/login"

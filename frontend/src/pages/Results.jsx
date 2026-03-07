@@ -22,7 +22,7 @@ const Results = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -79,17 +79,16 @@ const Results = () => {
         ) : (
           <div className="space-y-4">
             {data?.responses.map((response, index) => (
-              <div
-                key={response.id}
-                className="bg-white p-5 rounded-lg border"
-              >
+              <div key={response.id} className="bg-white p-5 rounded-lg border">
                 <p className="text-sm text-purple-600 font-medium mb-3">
                   Response {index + 1}
                 </p>
                 <div className="space-y-3">
                   {response.answers.map((answer, i) => (
                     <div key={i} className="border-l-2 border-purple-200 pl-3">
-                      <p className="text-sm text-gray-500">Question {answer.question_id}</p>
+                      <p className="text-sm text-gray-500">
+                        Question {answer.question_id}
+                      </p>
                       <p className="text-gray-800">{answer.answer_text}</p>
                     </div>
                   ))}

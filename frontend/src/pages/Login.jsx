@@ -51,9 +51,6 @@ const Login = () => {
         <Link to="/" className="text-purple-900 font-bold text-lg hover:text-purple-600">
           ← Back
         </Link>
-        <Link to="/about" className="text-gray-600 hover:text-purple-600">
-          About
-        </Link>
       </nav>
       
       <div className="min-h-screen bg-gray-50 flex items-center justify-center -mt-20">

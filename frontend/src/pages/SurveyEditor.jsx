@@ -8,6 +8,8 @@ const SurveyEditor = () => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newQuestion, setNewQuestion] = useState("");
+  const [newQuestionType, setNewQuestionType] = useState("text");
+  const [newQuestionOptions, setNewQuestionOptions] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [copied, setCopied] = useState(false);
@@ -59,7 +61,11 @@ const SurveyEditor = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ text: newQuestion }),
+          body: JSON.stringify({
+            text: newQuestion,
+            type: newQuestionType,
+            options: newQuestionOptions || null,
+          }),
         },
       );
 
@@ -67,6 +73,8 @@ const SurveyEditor = () => {
         const question = await response.json();
         setQuestions([...questions, question]);
         setNewQuestion("");
+        setNewQuestionType("text");
+        setNewQuestionOptions("");
       }
     } catch (err) {
       console.error("Error adding question:", err);
@@ -213,7 +221,7 @@ const SurveyEditor = () => {
                   <span className="text-gray-400 mt-1">⋮⋮</span>
                   <div>
                     <p className="text-sm text-gray-400 mb-1">
-                      Question {index + 1}
+                      Question {index + 1} . {question.type}
                     </p>
                     <p className="text-gray-800">{question.text}</p>
                   </div>
@@ -248,13 +256,33 @@ const SurveyEditor = () => {
             onChange={(e) => setNewQuestion(e.target.value)}
             className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
           />
-          <button
-            onClick={handleAddQuestion}
-            disabled={!newQuestion.trim()}
-            className="w-full mt-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
-          >
-            + Add Question
-          </button>
+          <div className="flex gap-2 mt-2">
+            <select
+              value={newQuestionType}
+              onChange={(e) => setNewQuestionType(e.target.value)}
+              className="p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+            >
+              <option value="text">Text</option>
+              <option value="rating">Rating</option>
+              <option value="multiple_choice">Multiple Choice</option>
+            </select>
+            <button
+              onClick={handleAddQuestion}
+              disabled={!newQuestion.trim()}
+              className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
+            >
+              + Add Question
+            </button>
+          </div>
+          {newQuestionType === "multiple_choice" && (
+            <input
+              type="text"
+              placeholder="Options (comma-separated): Option A, Option B, Option C"
+              value={newQuestionOptions}
+              onChange={(e) => setNewQuestionOptions(e.target.value)}
+              className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+            />
+          )}
         </div>
       </main>
     </div>

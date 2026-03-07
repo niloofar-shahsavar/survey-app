@@ -34,7 +34,8 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String, nullable=False)
-    type = Column(String, default="text") 
+    type = Column(String, default="text")
+    options = Column(String, nullable=True)
 
     survey_id = Column(Integer, ForeignKey("surveys.id"))
 
