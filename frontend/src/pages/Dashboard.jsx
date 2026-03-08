@@ -8,6 +8,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [surveyToDelete, setSurveyToDelete] = useState(null);
+  const [totalResponses, setTotalResponses] = useState(0);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -42,6 +43,12 @@ function Dashboard() {
         if (surveysResponse.ok) {
           const surveysData = await surveysResponse.json();
           setSurveys(surveysData);
+
+          const total = surveysData.reduce(
+            (sum, s) => sum + (s.response_count || 0),
+            0,
+          );
+          setTotalResponses(total);
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -143,11 +150,15 @@ function Dashboard() {
             <div className="text-gray-500 text-sm">Total Surveys</div>
           </div>
           <div className="bg-white p-6 rounded-lg border text-center">
-            <div className="text-3xl font-bold text-gray-800">127</div>
+            <div className="text-3xl font-bold text-gray-800">
+              {totalResponses}
+            </div>
             <div className="text-gray-500 text-sm">Total Responses</div>
           </div>
           <div className="bg-white p-6 rounded-lg border text-center">
-            <div className="text-3xl font-bold text-gray-800">2</div>
+            <div className="text-3xl font-bold text-gray-800">
+              {surveys.filter((s) => s.questions_count > 0).length}
+            </div>
             <div className="text-gray-500 text-sm">Active</div>
           </div>
         </div>

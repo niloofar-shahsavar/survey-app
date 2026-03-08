@@ -30,7 +30,20 @@ def get_surveys(db: Session = Depends(get_db), current_user: User = Depends(get_
     surveys = db.execute(
         select(Survey).where(Survey.owner_id == current_user.id)
     ).scalars().all()
-    return surveys
+    
+    result = []
+    for s in surveys:
+        response_count = db.execute(
+            select(Response).where(Response.survey_id == s.id)
+        ).scalars().all()
+        result.append({
+            "id": s.id,
+            "title": s.title,
+            "description": s.description,
+            "questions_count": len(s.questions),
+            "response_count": len(response_count)
+        })
+    return result
 
 
 @router.get("/{survey_id}")
