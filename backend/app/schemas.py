@@ -16,7 +16,7 @@ class SurveyCreate(BaseModel):
 class QuestionCreate(BaseModel):
     text: str
     type: str = "text"
-    options: str = None
+    options: Optional[str] = None
 
 
 class AnswerCreate(BaseModel):
