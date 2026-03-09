@@ -29,8 +29,19 @@ async def generate_questions(request: GenerateRequest):
     prompt = f"""
     Generate 5 survey questions for this goal: {goal}
     
-    Return ONLY a JSON array like this, nothing else:
-    ["Question 1?", "Question 2?", "Question 3?", "Question 4?", "Question 5?"]
+    Return ONLY a valid JSON array with no extra text. Each question must have:
+    - text: the question
+    - type: one of "text", "rating", or "multiple_choice"
+    - options: comma-separated choices (only for multiple_choice, null for others)
+    
+    Example format:
+    [
+      {{"text": "How satisfied are you?", "type": "rating", "options": null}},
+      {{"text": "What could we improve?", "type": "text", "options": null}},
+      {{"text": "How did you find us?", "type": "multiple_choice", "options": "Google, Friend, Social Media, Other"}}
+    ]
+    
+    Mix different types. Return ONLY the JSON array, nothing else.
     """
     
     try:

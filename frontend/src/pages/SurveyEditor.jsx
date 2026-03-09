@@ -157,10 +157,16 @@ const SurveyEditor = () => {
 
       const data = await response.json();
       if (data.questions) {
-        const parsed = JSON.parse(data.questions);
+        // Clean the response (remove markdown code blocks if present)
+        let cleanJson = data.questions.trim();
+        if (cleanJson.startsWith("```")) {
+          cleanJson = cleanJson.replace(/```json?\n?/g, "").replace(/```/g, "");
+        }
+
+        const parsed = JSON.parse(cleanJson);
         const token = localStorage.getItem("access_token");
 
-        for (const questionText of parsed) {
+        for (const question of parsed) {
           await fetch(`http://localhost:8000/surveys/${surveyId}/questions`, {
             method: "POST",
             headers: {
@@ -168,9 +174,9 @@ const SurveyEditor = () => {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              text: questionText,
-              type: "text",
-              options: null,
+              text: question.text,
+              type: question.type || "text",
+              options: question.options || null,
             }),
           });
         }
