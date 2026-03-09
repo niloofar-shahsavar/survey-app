@@ -13,6 +13,8 @@ const SurveyEditor = () => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [copied, setCopied] = useState(false);
+  const [aiGoal, setAiGoal] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -138,6 +140,59 @@ const SurveyEditor = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleGenerateAI = async () => {
+    if (!aiGoal.trim()) return;
+    setAiLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:8000/ai/generate-questions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ goal: aiGoal }),
+        },
+      );
+
+      const data = await response.json();
+      if (data.questions) {
+        const parsed = JSON.parse(data.questions);
+        const token = localStorage.getItem("access_token");
+
+        for (const questionText of parsed) {
+          await fetch(`http://localhost:8000/surveys/${surveyId}/questions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              text: questionText,
+              type: "text",
+              options: null,
+            }),
+          });
+        }
+
+        // Refresh survey
+        const surveyResponse = await fetch(
+          `http://localhost:8000/surveys/${surveyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        const surveyData = await surveyResponse.json();
+        setQuestions(surveyData.questions || []);
+        setAiGoal("");
+      }
+    } catch (err) {
+      console.error("Error generating questions:", err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -247,7 +302,25 @@ const SurveyEditor = () => {
             )}
           </div>
         ))}
-
+        <div className="mt-4 bg-purple-50 p-4 rounded-lg border border-purple-200">
+          <p className="text-sm text-purple-700 font-medium mb-2">
+            ✨ Generate with AI
+          </p>
+          <input
+            type="text"
+            placeholder="Describe your survey goal (e.g., customer satisfaction, employee feedback)"
+            value={aiGoal}
+            onChange={(e) => setAiGoal(e.target.value)}
+            className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+          />
+          <button
+            onClick={handleGenerateAI}
+            disabled={!aiGoal.trim() || aiLoading}
+            className="w-full mt-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
+          >
+            {aiLoading ? "Generating..." : "Generate 5 Questions"}
+          </button>
+        </div>
         <div className="mt-4 bg-white p-4 rounded-lg border">
           <input
             type="text"
