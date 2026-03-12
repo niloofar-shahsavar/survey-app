@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import ThemeToggle from "../components/ThemeToggle";
 
 const SurveyResponse = () => {
   const { surveyId } = useParams();
@@ -10,7 +11,6 @@ const SurveyResponse = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch survey data from API
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
@@ -24,7 +24,6 @@ const SurveyResponse = () => {
         const data = await response.json();
         setSurvey(data);
 
-        // Initialize answers object
         const initialAnswers = {};
         data.questions.forEach((q) => {
           initialAnswers[q.id] = "";
@@ -40,22 +39,14 @@ const SurveyResponse = () => {
     fetchSurvey();
   }, [surveyId]);
 
-  // Handle answer change
   const handleAnswerChange = (questionId, value) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: value,
-    }));
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  // Submit survey response
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate all answers are filled
-    const allFilled = Object.values(answers).every(
-      (answer) => answer.trim() !== "",
-    );
+    const allFilled = Object.values(answers).every((answer) => answer.trim() !== "");
     if (!allFilled) {
       setError("Please answer all questions");
       return;
@@ -64,7 +55,6 @@ const SurveyResponse = () => {
     try {
       setSubmitting(true);
 
-      // Format answers for API
       const formattedAnswers = survey.questions.map((q) => ({
         question_id: q.id,
         answer_text: answers[q.id],
@@ -74,12 +64,8 @@ const SurveyResponse = () => {
         `http://127.0.0.1:8000/surveys/public/${surveyId}/submit`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            answers: formattedAnswers,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers: formattedAnswers }),
         },
       );
 
@@ -96,54 +82,43 @@ const SurveyResponse = () => {
     }
   };
 
-  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-xl text-gray-600">Loading survey...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center">
+        <div className="text-gray-400 dark:text-gray-500">Loading survey...</div>
       </div>
     );
   }
 
-  // Error state
   if (error && !submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-          <div className="text-center">
-            <div className="text-red-500 text-5xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
-            <p className="text-red-600 mb-6">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
-            >
-              Try Again
-            </button>
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center px-4">
+        <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-10 max-w-md w-full text-center shadow-sm dark:shadow-none">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Error</h2>
+          <p className="text-red-500 dark:text-red-400 mb-8 text-sm">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
   }
 
-  // Success/Thank you state
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-          <div className="text-green-500 text-6xl mb-4">✅</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-3">Thank You!</h2>
-          <p className="text-gray-600 mb-2">
-            Your response has been recorded successfully.
-          </p>
-          <p className="text-gray-600 mb-6">
-            We appreciate your feedback and input.
-          </p>
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center px-4">
+        <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-10 max-w-md w-full text-center shadow-sm dark:shadow-none">
+          <div className="text-6xl mb-4">✅</div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Thank You!</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-1 text-sm">Your response has been recorded successfully.</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm mb-8">We appreciate your feedback and input.</p>
           <button
             onClick={() => (window.location.href = "/")}
-            className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
+            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
           >
             Back to Home
           </button>
@@ -152,29 +127,35 @@ const SurveyResponse = () => {
     );
   }
 
-  // Survey form
+  const answeredCount = Object.values(answers).filter((a) => a.trim() !== "").length;
+  const totalCount = survey?.questions.length || 0;
+  const progress = totalCount > 0 ? (answeredCount / totalCount) * 100 : 0;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 py-10 px-4">
+      {/* Theme toggle */}
+      <div className="max-w-2xl mx-auto flex justify-end mb-4">
+        <ThemeToggle />
+      </div>
+
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-8 shadow-sm dark:shadow-none">
           {/* Survey Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1.5">
               {survey?.title}
             </h1>
             {survey?.description && (
-              <p className="text-gray-600 text-lg">{survey.description}</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">{survey.description}</p>
             )}
           </div>
 
           {/* Survey Form */}
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-7">
             {survey?.questions.map((question, index) => (
-              <div key={question.id} className="border-b pb-6 last:border-b-0">
-                <label className="block text-lg font-semibold text-gray-800 mb-3">
-                  <span className="text-indigo-600 font-bold">
-                    {index + 1}.
-                  </span>{" "}
+              <div key={question.id} className="border-b border-gray-100 dark:border-gray-800 pb-7 last:border-b-0">
+                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                  <span className="text-purple-600 dark:text-purple-400 font-bold">{index + 1}.</span>{" "}
                   {question.text}
                 </label>
 
@@ -182,11 +163,9 @@ const SurveyResponse = () => {
                 {question.type === "text" && (
                   <textarea
                     value={answers[question.id] || ""}
-                    onChange={(e) =>
-                      handleAnswerChange(question.id, e.target.value)
-                    }
+                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                     placeholder="Enter your answer here..."
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-all duration-200"
                     rows="4"
                     required
                   />
@@ -199,13 +178,11 @@ const SurveyResponse = () => {
                       <button
                         key={num}
                         type="button"
-                        onClick={() =>
-                          handleAnswerChange(question.id, num.toString())
-                        }
-                        className={`w-12 h-12 rounded-lg text-lg font-bold transition ${
+                        onClick={() => handleAnswerChange(question.id, num.toString())}
+                        className={`w-11 h-11 rounded-lg text-base font-bold transition-all duration-200 ${
                           answers[question.id] === num.toString()
-                            ? "bg-indigo-600 text-white"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            ? "bg-purple-600 text-white shadow-sm"
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
                         }`}
                       >
                         {num}
@@ -220,10 +197,10 @@ const SurveyResponse = () => {
                     {question.options.split(",").map((option, i) => (
                       <label
                         key={i}
-                        className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition ${
+                        className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
                           answers[question.id] === option.trim()
-                            ? "border-indigo-600 bg-indigo-50"
-                            : "border-gray-300 hover:border-gray-400"
+                            ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10 text-gray-900 dark:text-white"
+                            : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
                         }`}
                       >
                         <input
@@ -231,12 +208,10 @@ const SurveyResponse = () => {
                           name={`question-${question.id}`}
                           value={option.trim()}
                           checked={answers[question.id] === option.trim()}
-                          onChange={(e) =>
-                            handleAnswerChange(question.id, e.target.value)
-                          }
-                          className="mr-3"
+                          onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                          className="mr-3 accent-purple-600"
                         />
-                        {option.trim()}
+                        <span className="text-sm">{option.trim()}</span>
                       </label>
                     ))}
                   </div>
@@ -246,11 +221,9 @@ const SurveyResponse = () => {
                 {!question.type && (
                   <textarea
                     value={answers[question.id] || ""}
-                    onChange={(e) =>
-                      handleAnswerChange(question.id, e.target.value)
-                    }
+                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                     placeholder="Enter your answer here..."
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-all duration-200"
                     rows="4"
                     required
                   />
@@ -260,17 +233,17 @@ const SurveyResponse = () => {
 
             {/* Error message */}
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                <p className="text-red-700">{error}</p>
+              <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg">
+                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
               </div>
             )}
 
             {/* Submit Button */}
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
               >
                 {submitting ? "Submitting..." : "Submit Survey"}
               </button>
@@ -278,12 +251,10 @@ const SurveyResponse = () => {
                 type="reset"
                 onClick={() => {
                   const emptyAnswers = {};
-                  survey?.questions.forEach((q) => {
-                    emptyAnswers[q.id] = "";
-                  });
+                  survey?.questions.forEach((q) => { emptyAnswers[q.id] = ""; });
                   setAnswers(emptyAnswers);
                 }}
-                className="px-6 py-3 bg-gray-300 text-gray-800 font-bold rounded-lg hover:bg-gray-400 transition"
+                className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 text-sm"
               >
                 Clear All
               </button>
@@ -292,19 +263,16 @@ const SurveyResponse = () => {
         </div>
 
         {/* Progress indicator */}
-        <div className="mt-6 text-center text-gray-600">
-          <p>
-            Question{" "}
-            {Object.values(answers).filter((a) => a.trim() !== "").length} of{" "}
-            {survey?.questions.length} answered
-          </p>
-          <div className="w-full bg-gray-300 rounded-full h-2 mt-2">
+        <div className="mt-5 px-1">
+          <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 mb-1.5">
+            <span>{answeredCount} of {totalCount} answered</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1">
             <div
-              className="bg-indigo-600 h-2 rounded-full transition-all"
-              style={{
-                width: `${survey ? (Object.values(answers).filter((a) => a.trim() !== "").length / survey.questions.length) * 100 : 0}%`,
-              }}
-            ></div>
+              className="bg-purple-600 h-1 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
       </div>

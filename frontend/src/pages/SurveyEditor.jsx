@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import ThemeToggle from "../components/ThemeToggle";
 
 const SurveyEditor = () => {
   const { surveyId } = useParams();
@@ -15,6 +16,7 @@ const SurveyEditor = () => {
   const [copied, setCopied] = useState(false);
   const [aiGoal, setAiGoal] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -201,115 +203,123 @@ const SurveyEditor = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center">
+        <div className="text-gray-400 dark:text-gray-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="flex justify-between items-center px-8 py-4 bg-white border-b">
-        <div className="text-2xl font-bold text-purple-900">Survii</div>
-        <Link to="/dashboard" className="text-gray-500 hover:text-purple-600">
-          ← Back to Dashboard
-        </Link>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200">
+      <nav className="flex justify-between items-center px-8 py-4 bg-white dark:bg-transparent border-b border-gray-200 dark:border-gray-800/50">
+        <div className="text-xl font-bold text-gray-900 dark:text-white">Survii</div>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            to="/dashboard"
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200"
+          >
+            ← Back to Dashboard
+          </Link>
+        </div>
       </nav>
 
       <main className="max-w-3xl mx-auto px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-start mb-7">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {survey?.title || "Untitled Survey"}
             </h1>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-500 text-sm mt-0.5">
               {questions.length} questions
             </p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleShareLink}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-all duration-200"
             >
               {copied ? "Copied!" : "Share Link"}
             </button>
             <Link
               to={`/results/${surveyId}`}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-all duration-200"
             >
               View Results
             </Link>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+            <button
+              onClick={() => setShowPublishModal(true)}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+            >
               Publish
             </button>
           </div>
         </div>
 
-        {questions.map((question, index) => (
-          <div
-            key={question.id}
-            className="bg-white p-4 rounded-lg border flex justify-between items-center"
-          >
-            {editingId === question.id ? (
-              <div className="flex-1 mr-4">
-                <input
-                  type="text"
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:border-purple-400"
-                />
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleEditQuestion(question.id)}
-                    className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingId(null);
-                      setEditText("");
-                    }}
-                    className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex gap-3 items-start flex-1">
-                  <span className="text-gray-400 mt-1">⋮⋮</span>
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">
-                      Question {index + 1} . {question.type}
-                    </p>
-                    <p className="text-gray-800">{question.text}</p>
+        {/* Questions list */}
+        <div className="space-y-3 mb-5">
+          {questions.map((question, index) => (
+            <div
+              key={question.id}
+              className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex justify-between items-center hover:border-purple-300 dark:hover:border-purple-500/20 transition-all duration-200"
+            >
+              {editingId === question.id ? (
+                <div className="flex-1 mr-4">
+                  <input
+                    type="text"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => handleEditQuestion(question.id)}
+                      className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => { setEditingId(null); setEditText(""); }}
+                      className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setEditingId(question.id);
-                      setEditText(question.text);
-                    }}
-                    className="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteQuestion(question.id)}
-                    className="px-3 py-1 text-sm text-red-500 border border-red-200 rounded hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        ))}
-        <div className="mt-4 bg-purple-50 p-4 rounded-lg border border-purple-200">
-          <p className="text-sm text-purple-700 font-medium mb-2">
+              ) : (
+                <>
+                  <div className="flex gap-3 items-start flex-1">
+                    <span className="text-gray-300 dark:text-gray-700 mt-1">⋮⋮</span>
+                    <div>
+                      <p className="text-xs text-purple-500/70 dark:text-purple-400/70 mb-0.5 font-medium uppercase tracking-wide">
+                        Q{index + 1} · {question.type}
+                      </p>
+                      <p className="text-gray-800 dark:text-gray-200">{question.text}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setEditingId(question.id); setEditText(question.text); }}
+                      className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteQuestion(question.id)}
+                      className="px-3 py-1.5 text-sm text-red-500 dark:text-red-400 border border-red-200 dark:border-red-900/50 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* AI Generation */}
+        <div className="mb-4 bg-purple-50 dark:bg-purple-500/5 border border-purple-200 dark:border-purple-500/20 p-5 rounded-xl">
+          <p className="text-sm text-purple-700 dark:text-purple-400 font-medium mb-3">
             ✨ Generate with AI
           </p>
           <input
@@ -317,29 +327,31 @@ const SurveyEditor = () => {
             placeholder="Describe your survey goal (e.g., customer satisfaction, employee feedback)"
             value={aiGoal}
             onChange={(e) => setAiGoal(e.target.value)}
-            className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+            className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-200"
           />
           <button
             onClick={handleGenerateAI}
             disabled={!aiGoal.trim() || aiLoading}
-            className="w-full mt-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
+            className="w-full mt-3 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-600 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
           >
             {aiLoading ? "Generating..." : "Generate 5 Questions"}
           </button>
         </div>
-        <div className="mt-4 bg-white p-4 rounded-lg border">
+
+        {/* Manual Add Question */}
+        <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
           <input
             type="text"
             placeholder="Type your question here..."
             value={newQuestion}
             onChange={(e) => setNewQuestion(e.target.value)}
-            className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+            className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-200"
           />
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-3">
             <select
               value={newQuestionType}
               onChange={(e) => setNewQuestionType(e.target.value)}
-              className="p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+              className="px-3 py-2.5 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition-all duration-200"
             >
               <option value="text">Text</option>
               <option value="rating">Rating</option>
@@ -348,7 +360,7 @@ const SurveyEditor = () => {
             <button
               onClick={handleAddQuestion}
               disabled={!newQuestion.trim()}
-              className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400"
+              className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-600 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
             >
               + Add Question
             </button>
@@ -359,11 +371,49 @@ const SurveyEditor = () => {
               placeholder="Options (comma-separated): Option A, Option B, Option C"
               value={newQuestionOptions}
               onChange={(e) => setNewQuestionOptions(e.target.value)}
-              className="w-full p-3 border rounded-lg text-gray-700 focus:outline-none focus:border-purple-400"
+              className="w-full mt-3 px-4 py-2.5 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-200"
             />
           )}
         </div>
       </main>
+
+      {showPublishModal && (
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-xl max-w-md w-full mx-4 text-center shadow-xl">
+            <div className="text-5xl mb-4">🎉</div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Survey is Live!</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+              Share this link to start collecting responses
+            </p>
+
+            <div className="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 p-3 rounded-lg mb-4 flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={`${window.location.origin}/survey/${surveyId}`}
+                className="flex-1 bg-transparent text-gray-700 dark:text-gray-300 text-sm outline-none"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/survey/${surveyId}`);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-sm rounded-lg transition-all duration-200"
+              >
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowPublishModal(false)}
+              className="w-full py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 text-sm"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
