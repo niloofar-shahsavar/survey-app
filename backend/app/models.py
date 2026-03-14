@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -36,6 +36,7 @@ class Question(Base):
     text = Column(String, nullable=False)
     type = Column(String, default="text")
     options = Column(String, nullable=True)
+    required = Column(Boolean, default=True)
 
     survey_id = Column(Integer, ForeignKey("surveys.id"))
 

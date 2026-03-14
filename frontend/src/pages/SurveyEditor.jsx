@@ -11,8 +11,10 @@ const SurveyEditor = () => {
   const [newQuestion, setNewQuestion] = useState("");
   const [newQuestionType, setNewQuestionType] = useState("text");
   const [newQuestionOptions, setNewQuestionOptions] = useState("");
+  const [newQuestionRequired, setNewQuestionRequired] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [editRequired, setEditRequired] = useState(true);
   const [copied, setCopied] = useState(false);
   const [aiGoal, setAiGoal] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -69,6 +71,7 @@ const SurveyEditor = () => {
             text: newQuestion,
             type: newQuestionType,
             options: newQuestionOptions || null,
+            required: newQuestionRequired,
           }),
         },
       );
@@ -79,6 +82,7 @@ const SurveyEditor = () => {
         setNewQuestion("");
         setNewQuestionType("text");
         setNewQuestionOptions("");
+        setNewQuestionRequired(true);
       }
     } catch (err) {
       console.error("Error adding question:", err);
@@ -117,14 +121,14 @@ const SurveyEditor = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ text: editText }),
+          body: JSON.stringify({ text: editText, required: editRequired }),
         },
       );
 
       if (response.ok) {
         setQuestions(
           questions.map((q) =>
-            q.id === questionId ? { ...q, text: editText } : q,
+            q.id === questionId ? { ...q, text: editText, required: editRequired } : q,
           ),
         );
         setEditingId(null);
@@ -212,7 +216,9 @@ const SurveyEditor = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200">
       <nav className="flex justify-between items-center px-8 py-4 bg-white dark:bg-transparent border-b border-gray-200 dark:border-gray-800/50">
-        <div className="text-xl font-bold text-gray-900 dark:text-white">Survii</div>
+        <div className="text-xl font-bold text-gray-900 dark:text-white">
+          Survii
+        </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
@@ -271,6 +277,21 @@ const SurveyEditor = () => {
                     onChange={(e) => setEditText(e.target.value)}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
                   />
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      type="checkbox"
+                      id={`required-${question.id}`}
+                      checked={editRequired}
+                      onChange={(e) => setEditRequired(e.target.checked)}
+                      className="w-4 h-4 text-purple-600 rounded"
+                    />
+                    <label
+                      htmlFor={`required-${question.id}`}
+                      className="text-sm text-gray-600 dark:text-gray-400"
+                    >
+                      Required
+                    </label>
+                  </div>
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => handleEditQuestion(question.id)}
@@ -279,7 +300,10 @@ const SurveyEditor = () => {
                       Save
                     </button>
                     <button
-                      onClick={() => { setEditingId(null); setEditText(""); }}
+                      onClick={() => {
+                        setEditingId(null);
+                        setEditText("");
+                      }}
                       className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
                     >
                       Cancel
@@ -289,17 +313,28 @@ const SurveyEditor = () => {
               ) : (
                 <>
                   <div className="flex gap-3 items-start flex-1">
-                    <span className="text-gray-300 dark:text-gray-700 mt-1">⋮⋮</span>
+                    <span className="text-gray-300 dark:text-gray-700 mt-1">
+                      ⋮⋮
+                    </span>
                     <div>
                       <p className="text-xs text-purple-500/70 dark:text-purple-400/70 mb-0.5 font-medium uppercase tracking-wide">
                         Q{index + 1} · {question.type}
+                        {question.required && (
+                          <span className="text-red-500 ml-1">*</span>
+                        )}
                       </p>
-                      <p className="text-gray-800 dark:text-gray-200">{question.text}</p>
+                      <p className="text-gray-800 dark:text-gray-200">
+                        {question.text}
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => { setEditingId(question.id); setEditText(question.text); }}
+                      onClick={() => {
+                        setEditingId(question.id);
+                        setEditText(question.text);
+                        setEditRequired(question.required);
+                      }}
                       className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
                     >
                       Edit
@@ -374,6 +409,21 @@ const SurveyEditor = () => {
               className="w-full mt-3 px-4 py-2.5 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-200"
             />
           )}
+          <div className="flex items-center gap-2 mt-3">
+            <input
+              type="checkbox"
+              id="required"
+              checked={newQuestionRequired}
+              onChange={(e) => setNewQuestionRequired(e.target.checked)}
+              className="w-4 h-4 text-purple-600 rounded"
+            />
+            <label
+              htmlFor="required"
+              className="text-sm text-gray-600 dark:text-gray-400"
+            >
+              Required question
+            </label>
+          </div>
         </div>
       </main>
 
@@ -381,7 +431,9 @@ const SurveyEditor = () => {
         <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-xl max-w-md w-full mx-4 text-center shadow-xl">
             <div className="text-5xl mb-4">🎉</div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Survey is Live!</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Survey is Live!
+            </h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
               Share this link to start collecting responses
             </p>
@@ -395,7 +447,9 @@ const SurveyEditor = () => {
               />
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/survey/${surveyId}`);
+                  navigator.clipboard.writeText(
+                    `${window.location.origin}/survey/${surveyId}`,
+                  );
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
                 }}

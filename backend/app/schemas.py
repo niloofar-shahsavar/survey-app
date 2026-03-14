@@ -17,6 +17,7 @@ class QuestionCreate(BaseModel):
     text: str
     type: str = "text"
     options: Optional[str] = None
+    required: bool = True
 
 
 class AnswerCreate(BaseModel):

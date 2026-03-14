@@ -60,7 +60,7 @@ def get_survey(survey_id: int, db: Session = Depends(get_db), current_user: User
         "id": survey.id,
         "title": survey.title,
         "description": survey.description,
-        "questions": [{"id": q.id, "text": q.text, "type": q.type, "options": q.options} for q in survey.questions]
+        "questions": [{"id": q.id, "text": q.text, "type": q.type, "options": q.options, "required": q.required} for q in survey.questions]
     }
 
 
@@ -106,12 +106,12 @@ def add_question(survey_id: int, question: QuestionCreate, db: Session = Depends
     if not survey:
         raise HTTPException(status_code=404, detail="Survey not found")
     
-    db_question = Question(text=question.text, type=question.type, options=question.options, survey_id=survey_id)
+    db_question = Question(text=question.text, type=question.type, options=question.options, required=question.required, survey_id=survey_id)
     db.add(db_question)
     db.commit()
     db.refresh(db_question)
     
-    return {"id": db_question.id, "text": db_question.text, "type": db_question.type, "options": db_question.options, "survey_id": db_question.survey_id}
+    return {"id": db_question.id, "text": db_question.text, "type": db_question.type, "options": db_question.options, "required": db_question.required, "survey_id": db_question.survey_id}
 
 
 @router.post("/{survey_id}/questions/batch")
@@ -173,11 +173,11 @@ def update_question(survey_id: int, question_id: int, question_data: QuestionCre
         raise HTTPException(status_code=404, detail="Question not found")
     
     question.text = question_data.text
+    question.required = question_data.required
     db.commit()
     db.refresh(question)
     
-    return {"id": question.id, "text": question.text, "survey_id": question.survey_id}
-
+    return {"id": question.id, "text": question.text, "type": question.type, "options": question.options, "required": question.required, "survey_id": question.survey_id}
 # PUBLIC ENDPOINTS FOR RESPONDENTS (NO AUTH REQUIRED)
 
 @router.get("/public/{survey_id}")
@@ -194,7 +194,7 @@ def get_survey_public(survey_id: int, db: Session = Depends(get_db)):
         "id": survey.id,
         "title": survey.title,
         "description": survey.description,
-        "questions": [{"id": q.id, "text": q.text, "type": q.type, "options": q.options} for q in survey.questions]
+        "questions": [{"id": q.id, "text": q.text, "type": q.type, "options": q.options, "required": q.required} for q in survey.questions]
     }
 
 
