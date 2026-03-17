@@ -1,18 +1,21 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+﻿import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
 
 const SurveyResponse = () => {
   const { surveyId } = useParams();
+  const [searchParams] = useSearchParams();
+  const responseId = searchParams.get("responseId");
   const [survey, setSurvey] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(!!responseId);
 
   useEffect(() => {
-    const fetchSurvey = async () => {
+    const fetchSurveyAndResponse = async () => {
       try {
         setLoading(true);
         const response = await fetch(
@@ -24,20 +27,43 @@ const SurveyResponse = () => {
         const data = await response.json();
         setSurvey(data);
 
-        const initialAnswers = {};
-        data.questions.forEach((q) => {
-          initialAnswers[q.id] = "";
-        });
-        setAnswers(initialAnswers);
+        if (responseId) {
+          const resp = await fetch(
+            `http://127.0.0.1:8000/surveys/${surveyId}/responses`,
+          );
+          if (!resp.ok) throw new Error("Could not fetch previous response");
+          const respData = await resp.json();
+          const prev = respData.responses.find(
+            (r) => r.id === parseInt(responseId),
+          );
+          if (prev) {
+            const prevAnswers = {};
+            prev.answers.forEach((a) => {
+              prevAnswers[a.question_id] = a.answer_text;
+            });
+            setAnswers(prevAnswers);
+          } else {
+            const initialAnswers = {};
+            data.questions.forEach((q) => {
+              initialAnswers[q.id] = "";
+            });
+            setAnswers(initialAnswers);
+          }
+        } else {
+          const initialAnswers = {};
+          data.questions.forEach((q) => {
+            initialAnswers[q.id] = "";
+          });
+          setAnswers(initialAnswers);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchSurvey();
-  }, [surveyId]);
+    fetchSurveyAndResponse();
+  }, [surveyId, responseId]);
 
   const handleAnswerChange = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -63,17 +89,31 @@ const SurveyResponse = () => {
         answer_text: answers[q.id],
       }));
 
-      const response = await fetch(
-        `http://127.0.0.1:8000/surveys/public/${surveyId}/submit`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: formattedAnswers }),
-        },
-      );
+      let response;
+      if (isEditing && responseId) {
+        response = await fetch(
+          `http://127.0.0.1:8000/surveys/public/${surveyId}/response/${responseId}/edit`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ answers: formattedAnswers }),
+          },
+        );
+      } else {
+        response = await fetch(
+          `http://127.0.0.1:8000/surveys/public/${surveyId}/submit`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ answers: formattedAnswers }),
+          },
+        );
+      }
 
       if (!response.ok) {
-        throw new Error("Failed to submit survey");
+        throw new Error(
+          isEditing ? "Failed to update response" : "Failed to submit survey",
+        );
       }
 
       setSubmitted(true);
@@ -280,7 +320,13 @@ const SurveyResponse = () => {
                 disabled={submitting}
                 className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
               >
-                {submitting ? "Submitting..." : "Submit Survey"}
+                {submitting
+                  ? isEditing
+                    ? "Updating..."
+                    : "Submitting..."
+                  : isEditing
+                  ? "Update Response"
+                  : "Submit Survey"}
               </button>
               <button
                 type="reset"
