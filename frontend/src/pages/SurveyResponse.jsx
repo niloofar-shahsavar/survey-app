@@ -39,19 +39,32 @@ const SurveyResponse = () => {
     fetchSurvey();
   }, [surveyId]);
 
-  const handleAnswerChange = (questionId, value) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  const handleAnswerChange = (questionId, value, isMultiSelect = false) => {
+    if (isMultiSelect) {
+      setAnswers((prev) => {
+        const current = prev[questionId] ? prev[questionId].split(", ") : [];
+        if (current.includes(value)) {
+          // Remove if already selected
+          const updated = current.filter((v) => v !== value);
+          return { ...prev, [questionId]: updated.join(", ") };
+        } else {
+          // Add if not selected
+          return { ...prev, [questionId]: [...current, value].join(", ") };
+        }
+      });
+    } else {
+      setAnswers((prev) => ({ ...prev, [questionId]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const requiredUnanswered = survey.questions.filter(
-      (q) => q.required && (!answers[q.id] || answers[q.id].trim() === ""),
+    const allFilled = Object.values(answers).every(
+      (answer) => answer.trim() !== "",
     );
-
-    if (requiredUnanswered.length > 0) {
-      setError("Please answer all required questions");
+    if (!allFilled) {
+      setError("Please answer all questions");
       return;
     }
 
@@ -245,6 +258,41 @@ const SurveyResponse = () => {
                         <span className="text-sm">{option.trim()}</span>
                       </label>
                     ))}
+                  </div>
+                )}
+                {/* Multi select type */}
+                {question.type === "multi_select" && question.options && (
+                  <div className="space-y-2">
+                    {question.options.split(",").map((option, i) => {
+                      const selected = answers[question.id]
+                        ?.split(", ")
+                        .includes(option.trim());
+                      return (
+                        <label
+                          key={i}
+                          className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
+                            selected
+                              ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10 text-gray-900 dark:text-white"
+                              : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            value={option.trim()}
+                            checked={selected}
+                            onChange={() =>
+                              handleAnswerChange(
+                                question.id,
+                                option.trim(),
+                                true,
+                              )
+                            }
+                            className="mr-3 accent-purple-600"
+                          />
+                          <span className="text-sm">{option.trim()}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 )}
 

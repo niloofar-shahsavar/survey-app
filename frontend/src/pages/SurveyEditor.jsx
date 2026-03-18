@@ -128,7 +128,9 @@ const SurveyEditor = () => {
       if (response.ok) {
         setQuestions(
           questions.map((q) =>
-            q.id === questionId ? { ...q, text: editText, required: editRequired } : q,
+            q.id === questionId
+              ? { ...q, text: editText, required: editRequired }
+              : q,
           ),
         );
         setEditingId(null);
@@ -183,6 +185,7 @@ const SurveyEditor = () => {
               text: question.text,
               type: question.type || "text",
               options: question.options || null,
+              required: true,
             }),
           });
         }
@@ -391,6 +394,7 @@ const SurveyEditor = () => {
               <option value="text">Text</option>
               <option value="rating">Rating</option>
               <option value="multiple_choice">Multiple Choice</option>
+              <option value="multi_select">Multi Select</option>
             </select>
             <button
               onClick={handleAddQuestion}
@@ -400,7 +404,8 @@ const SurveyEditor = () => {
               + Add Question
             </button>
           </div>
-          {newQuestionType === "multiple_choice" && (
+          {(newQuestionType === "multiple_choice" ||
+            newQuestionType === "multi_select") && (
             <input
               type="text"
               placeholder="Options (comma-separated): Option A, Option B, Option C"

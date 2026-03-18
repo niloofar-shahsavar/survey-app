@@ -31,8 +31,11 @@ async def generate_questions(request: GenerateRequest):
     
     Return ONLY a valid JSON array with no extra text. Each question must have:
     - text: the question
-    - type: one of "text", "rating", or "multiple_choice"
-    - options: comma-separated choices (only for multiple_choice, null for others)
+    - type: one of "text", "rating", "multiple_choice", or "multi_select"
+    - options: comma-separated choices (only for multiple_choice and multi_select, null for others)
+
+    Use multi_select when users should be able to choose more than one option (e.g., "Select all that apply").
+    Use multiple_choice when users should pick only one option.
     
     Example format:
     [
