@@ -268,3 +268,43 @@ def get_survey_responses(survey_id: int, db: Session = Depends(get_db), current_
         "total_responses": len(responses),
         "responses": formatted_responses
     }
+
+
+# PATCH endpoint to edit a response before survey closes (public, no auth)
+from fastapi import Body
+from datetime import datetime
+
+@router.patch("/public/{survey_id}/response/{response_id}/edit")
+def edit_survey_response(
+    survey_id: int,
+    response_id: int,
+    response_data: SurveyResponseSubmit = Body(...),
+    db: Session = Depends(get_db)
+):
+    # Check if survey exists
+    survey = db.execute(select(Survey).where(Survey.id == survey_id)).scalars().first()
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
+    # Optionally: Check if survey is closed (add a 'closed' or 'expires_at' field to Survey model for full support)
+    # For now, assume always open
+
+    # Find the response
+    response = db.execute(select(Response).where(Response.id == response_id, Response.survey_id == survey_id)).scalars().first()
+    if not response:
+        raise HTTPException(status_code=404, detail="Response not found")
+
+    # Delete old answers
+    db.query(Answer).filter(Answer.response_id == response_id).delete()
+    db.commit()
+
+    # Add new answers
+    for answer in response_data.answers:
+        new_answer = Answer(
+            response_id=response_id,
+            question_id=answer.question_id,
+            answer_text=answer.answer_text
+        )
+        db.add(new_answer)
+    db.commit()
+    return {"id": response_id, "message": "Response updated successfully"}

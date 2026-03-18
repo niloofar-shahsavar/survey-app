@@ -1,8 +1,9 @@
-import LandingPage from "./pages/LandingPage";
+﻿import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import CreateSurvey from "./pages/CreateSurvey";
 import SurveyEditor from "./pages/SurveyEditor";
 import SurveyResponse from "./pages/SurveyResponse";
+import SurveyResponses from "./pages/SurveyResponses";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import About from "./pages/About";
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/create" element={<CreateSurvey />} />
           <Route path="/editor/:surveyId" element={<SurveyEditor />} />
           <Route path="/survey/:surveyId" element={<SurveyResponse />} />
+          <Route path="/survey/:surveyId/responses" element={<SurveyResponses />} />
           <Route path="/results/:surveyId" element={<Results />} />
         </Routes>
       </BrowserRouter>
