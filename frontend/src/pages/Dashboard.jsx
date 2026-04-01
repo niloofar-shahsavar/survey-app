@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ThemeToggle from "../components/ThemeToggle";
+import API_BASE from "../config/api";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ function Dashboard() {
           return;
         }
 
-        const response = await fetch("http://localhost:8000/auth/profile", {
+        const response = await fetch(`${API_BASE}/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -33,7 +34,7 @@ function Dashboard() {
         const userData = await response.json();
         setUser(userData);
 
-        const surveysResponse = await fetch("http://localhost:8000/surveys/", {
+        const surveysResponse = await fetch(`${API_BASE}/surveys`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -57,7 +58,7 @@ function Dashboard() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      await fetch("http://localhost:8000/auth/logout", {
+      await fetch(`${API_BASE}/auth/logout`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -74,7 +75,7 @@ function Dashboard() {
     try {
       const token = localStorage.getItem("access_token");
       const response = await fetch(
-        `http://localhost:8000/surveys/${surveyToDelete.id}`,
+        `${API_BASE}/surveys/${surveyToDelete.id}`,
         { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
       );
 

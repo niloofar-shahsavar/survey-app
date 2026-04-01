@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
+import API_BASE from "../config/api";
 
 const Results = () => {
   const { surveyId } = useParams();
@@ -18,7 +19,7 @@ const Results = () => {
         }
 
         const response = await fetch(
-          `http://localhost:8000/surveys/${surveyId}/responses`,
+          `${API_BASE}/surveys/${surveyId}/responses`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
 

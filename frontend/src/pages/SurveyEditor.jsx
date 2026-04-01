@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
+import API_BASE from "../config/api";
 
 const SurveyEditor = () => {
   const { surveyId } = useParams();
@@ -30,7 +31,7 @@ const SurveyEditor = () => {
         }
 
         const response = await fetch(
-          `http://localhost:8000/surveys/${surveyId}`,
+          `${API_BASE}/surveys/${surveyId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -60,7 +61,7 @@ const SurveyEditor = () => {
     try {
       const token = localStorage.getItem("access_token");
       const response = await fetch(
-        `http://localhost:8000/surveys/${surveyId}/questions`,
+        `${API_BASE}/surveys/${surveyId}/questions`,
         {
           method: "POST",
           headers: {
@@ -93,7 +94,7 @@ const SurveyEditor = () => {
     try {
       const token = localStorage.getItem("access_token");
       const response = await fetch(
-        `http://localhost:8000/surveys/${surveyId}/questions/${questionId}`,
+        `${API_BASE}/surveys/${surveyId}/questions/${questionId}`,
         {
           method: "DELETE",
           headers: {
@@ -114,7 +115,7 @@ const SurveyEditor = () => {
     try {
       const token = localStorage.getItem("access_token");
       const response = await fetch(
-        `http://localhost:8000/surveys/${surveyId}/questions/${questionId}`,
+        `${API_BASE}/surveys/${surveyId}/questions/${questionId}`,
         {
           method: "PUT",
           headers: {
@@ -152,12 +153,18 @@ const SurveyEditor = () => {
     if (!aiGoal.trim()) return;
     setAiLoading(true);
     try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
       const response = await fetch(
-        "http://localhost:8000/ai/generate-questions",
+        `${API_BASE}/ai/generate-questions`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ goal: aiGoal }),
         },
@@ -172,10 +179,10 @@ const SurveyEditor = () => {
         }
 
         const parsed = JSON.parse(cleanJson);
-        const token = localStorage.getItem("access_token");
+        
 
         for (const question of parsed) {
-          await fetch(`http://localhost:8000/surveys/${surveyId}/questions`, {
+          await fetch(`${API_BASE}/surveys/${surveyId}/questions`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -192,7 +199,7 @@ const SurveyEditor = () => {
 
         // Refresh survey
         const surveyResponse = await fetch(
-          `http://localhost:8000/surveys/${surveyId}`,
+          `${API_BASE}/surveys/${surveyId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },

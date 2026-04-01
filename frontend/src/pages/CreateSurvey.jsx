@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ThemeToggle from "../components/ThemeToggle";
+import API_BASE from "../config/api";
 
 function CreateSurvey() {
   const navigate = useNavigate();
@@ -17,11 +18,11 @@ function CreateSurvey() {
     try {
       const token = localStorage.getItem("access_token");
       if (!token) {
-        navigate("/Login");
+        navigate("/login");
         return;
       }
 
-      const response = await fetch("http://localhost:8000/surveys/", {
+      const response = await fetch(`${API_BASE}/surveys`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

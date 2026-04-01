@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import API_BASE from "../config/api";
 
 const ContactUs = () => {
   const [name, setName] = useState("");
@@ -17,7 +18,7 @@ const ContactUs = () => {
     setSuccess(false);
 
     try {
-      const response = await fetch("http://localhost:8000/contact/send", {
+      const response = await fetch(`${API_BASE}/contact/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

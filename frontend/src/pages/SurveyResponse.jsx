@@ -1,134 +1,82 @@
 ﻿import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
-
+import API_BASE from "../config/api";
+ 
 const SurveyResponse = () => {
   const { surveyId } = useParams();
-  const [searchParams] = useSearchParams();
-  const responseId = searchParams.get("responseId");
   const [survey, setSurvey] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [isEditing, setIsEditing] = useState(!!responseId);
-
+ 
   useEffect(() => {
-    const fetchSurveyAndResponse = async () => {
+    const fetchSurvey = async () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://127.0.0.1:8000/surveys/public/${surveyId}`,
+          `${API_BASE}/surveys/public/${surveyId}`,
         );
         if (!response.ok) {
           throw new Error("Survey not found");
         }
         const data = await response.json();
         setSurvey(data);
-
-        if (responseId) {
-          const resp = await fetch(
-            `http://127.0.0.1:8000/surveys/${surveyId}/responses`,
-          );
-          if (!resp.ok) throw new Error("Could not fetch previous response");
-          const respData = await resp.json();
-          const prev = respData.responses.find(
-            (r) => r.id === parseInt(responseId),
-          );
-          if (prev) {
-            const prevAnswers = {};
-            prev.answers.forEach((a) => {
-              prevAnswers[a.question_id] = a.answer_text;
-            });
-            setAnswers(prevAnswers);
-          } else {
-            const initialAnswers = {};
-            data.questions.forEach((q) => {
-              initialAnswers[q.id] = "";
-            });
-            setAnswers(initialAnswers);
-          }
-        } else {
-          const initialAnswers = {};
-          data.questions.forEach((q) => {
-            initialAnswers[q.id] = "";
-          });
-          setAnswers(initialAnswers);
-        }
+ 
+        const initialAnswers = {};
+        data.questions.forEach((q) => {
+          initialAnswers[q.id] = "";
+        });
+        setAnswers(initialAnswers);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchSurveyAndResponse();
-  }, [surveyId, responseId]);
-
-  const handleAnswerChange = (questionId, value, isMultiSelect = false) => {
-    if (isMultiSelect) {
-      setAnswers((prev) => {
-        const current = prev[questionId] ? prev[questionId].split(", ") : [];
-        if (current.includes(value)) {
-          // Remove if already selected
-          const updated = current.filter((v) => v !== value);
-          return { ...prev, [questionId]: updated.join(", ") };
-        } else {
-          // Add if not selected
-          return { ...prev, [questionId]: [...current, value].join(", ") };
-        }
-      });
-    } else {
-      setAnswers((prev) => ({ ...prev, [questionId]: value }));
-    }
+ 
+    fetchSurvey();
+  }, [surveyId]);
+ 
+  const handleAnswerChange = (questionId, value) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const allFilled = Object.values(answers).every(
-      (answer) => answer.trim() !== "",
+ 
+    const requiredUnanswered = survey.questions.filter(
+      (q) => q.required && (!answers[q.id] || answers[q.id].trim() === ""),
     );
-    if (!allFilled) {
-      setError("Please answer all questions");
+ 
+    if (requiredUnanswered.length > 0) {
+      setError("Please answer all required questions");
       return;
     }
-
+ 
     try {
       setSubmitting(true);
-
+ 
       const formattedAnswers = survey.questions.map((q) => ({
         question_id: q.id,
         answer_text: answers[q.id],
       }));
-
-      let response;
-      if (isEditing && responseId) {
-        response = await fetch(
-          `http://127.0.0.1:8000/surveys/public/${surveyId}/response/${responseId}/edit`,
-          {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ answers: formattedAnswers }),
-          },
-        );
-      } else {
-        response = await fetch(
-          `http://127.0.0.1:8000/surveys/public/${surveyId}/submit`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ answers: formattedAnswers }),
-          },
-        );
-      }
-
+ 
+      const response = await fetch(
+        `${API_BASE}/surveys/public/${surveyId}/submit`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers: formattedAnswers }),
+        },
+      );
+ 
       if (!response.ok) {
-        throw new Error(
-          isEditing ? "Failed to update response" : "Failed to submit survey",
-        );
+        throw new Error("Failed to submit survey");
       }
-
+ 
       setSubmitted(true);
       setError(null);
     } catch (err) {
@@ -137,7 +85,7 @@ const SurveyResponse = () => {
       setSubmitting(false);
     }
   };
-
+ 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center">
@@ -147,7 +95,7 @@ const SurveyResponse = () => {
       </div>
     );
   }
-
+ 
   if (error && !submitted) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center px-4">
@@ -167,7 +115,7 @@ const SurveyResponse = () => {
       </div>
     );
   }
-
+ 
   if (submitted) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center px-4">
@@ -192,20 +140,20 @@ const SurveyResponse = () => {
       </div>
     );
   }
-
+ 
   const answeredCount = Object.values(answers).filter(
     (a) => a.trim() !== "",
   ).length;
   const totalCount = survey?.questions.length || 0;
   const progress = totalCount > 0 ? (answeredCount / totalCount) * 100 : 0;
-
+ 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 py-10 px-4">
       {/* Theme toggle */}
       <div className="max-w-2xl mx-auto flex justify-end mb-4">
         <ThemeToggle />
       </div>
-
+ 
       <div className="max-w-2xl mx-auto">
         <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-8 shadow-sm dark:shadow-none">
           {/* Survey Header */}
@@ -219,7 +167,7 @@ const SurveyResponse = () => {
               </p>
             )}
           </div>
-
+ 
           {/* Survey Form */}
           <form onSubmit={handleSubmit} className="space-y-7">
             {survey?.questions.map((question, index) => (
@@ -236,7 +184,7 @@ const SurveyResponse = () => {
                     <span className="text-red-500 ml-1">*</span>
                   )}
                 </label>
-
+ 
                 {/* Text type */}
                 {question.type === "text" && (
                   <textarea
@@ -247,10 +195,10 @@ const SurveyResponse = () => {
                     placeholder="Enter your answer here..."
                     className="w-full px-4 py-3 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-all duration-200"
                     rows="4"
-                    required
+                    required={question.required}
                   />
                 )}
-
+ 
                 {/* Rating type */}
                 {question.type === "rating" && (
                   <div className="flex gap-2">
@@ -272,7 +220,7 @@ const SurveyResponse = () => {
                     ))}
                   </div>
                 )}
-
+ 
                 {/* Multiple choice type */}
                 {question.type === "multiple_choice" && question.options && (
                   <div className="space-y-2">
@@ -300,6 +248,7 @@ const SurveyResponse = () => {
                     ))}
                   </div>
                 )}
+ 
                 {/* Multi select type */}
                 {question.type === "multi_select" && question.options && (
                   <div className="space-y-2">
@@ -320,13 +269,22 @@ const SurveyResponse = () => {
                             type="checkbox"
                             value={option.trim()}
                             checked={selected}
-                            onChange={() =>
-                              handleAnswerChange(
-                                question.id,
-                                option.trim(),
-                                true,
-                              )
-                            }
+                            onChange={() => {
+                              const current = answers[question.id]
+                                ? answers[question.id].split(", ")
+                                : [];
+                              if (current.includes(option.trim())) {
+                                handleAnswerChange(
+                                  question.id,
+                                  current.filter((v) => v !== option.trim()).join(", "),
+                                );
+                              } else {
+                                handleAnswerChange(
+                                  question.id,
+                                  [...current, option.trim()].join(", "),
+                                );
+                              }
+                            }}
                             className="mr-3 accent-purple-600"
                           />
                           <span className="text-sm">{option.trim()}</span>
@@ -335,7 +293,7 @@ const SurveyResponse = () => {
                     })}
                   </div>
                 )}
-
+ 
                 {/* Default to text if type is missing */}
                 {!question.type && (
                   <textarea
@@ -346,12 +304,12 @@ const SurveyResponse = () => {
                     placeholder="Enter your answer here..."
                     className="w-full px-4 py-3 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-all duration-200"
                     rows="4"
-                    required
+                    required={question.required}
                   />
                 )}
               </div>
             ))}
-
+ 
             {/* Error message */}
             {error && (
               <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg">
@@ -360,7 +318,7 @@ const SurveyResponse = () => {
                 </p>
               </div>
             )}
-
+ 
             {/* Submit Button */}
             <div className="flex gap-3">
               <button
@@ -368,13 +326,7 @@ const SurveyResponse = () => {
                 disabled={submitting}
                 className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
               >
-                {submitting
-                  ? isEditing
-                    ? "Updating..."
-                    : "Submitting..."
-                  : isEditing
-                  ? "Update Response"
-                  : "Submit Survey"}
+                {submitting ? "Submitting..." : "Submit Survey"}
               </button>
               <button
                 type="reset"
@@ -392,7 +344,7 @@ const SurveyResponse = () => {
             </div>
           </form>
         </div>
-
+ 
         {/* Progress indicator */}
         <div className="mt-5 px-1">
           <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 mb-1.5">
@@ -412,5 +364,5 @@ const SurveyResponse = () => {
     </div>
   );
 };
-
+ 
 export default SurveyResponse;
