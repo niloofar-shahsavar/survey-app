@@ -30,14 +30,11 @@ const SurveyEditor = () => {
           return;
         }
 
-        const response = await fetch(
-          `${API_BASE}/surveys/${surveyId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        const response = await fetch(`${API_BASE}/surveys/${surveyId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
 
         if (!response.ok) {
           navigate("/dashboard");
@@ -158,17 +155,14 @@ const SurveyEditor = () => {
         navigate("/login");
         return;
       }
-      const response = await fetch(
-        `${API_BASE}/ai/generate-questions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ goal: aiGoal }),
+      const response = await fetch(`${API_BASE}/ai/generate-questions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({ goal: aiGoal }),
+      });
 
       const data = await response.json();
       if (data.questions) {
@@ -179,7 +173,6 @@ const SurveyEditor = () => {
         }
 
         const parsed = JSON.parse(cleanJson);
-        
 
         for (const question of parsed) {
           await fetch(`${API_BASE}/surveys/${surveyId}/questions`, {
@@ -198,12 +191,9 @@ const SurveyEditor = () => {
         }
 
         // Refresh survey
-        const surveyResponse = await fetch(
-          `${API_BASE}/surveys/${surveyId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        const surveyResponse = await fetch(`${API_BASE}/surveys/${surveyId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const surveyData = await surveyResponse.json();
         setQuestions(surveyData.questions || []);
         setAiGoal("");
@@ -269,12 +259,6 @@ const SurveyEditor = () => {
             >
               Publish
             </button>
-            <Link
-              to={`/survey/${surveyId}/responses`}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            >
-              View Responses
-            </Link>
           </div>
         </div>
 
