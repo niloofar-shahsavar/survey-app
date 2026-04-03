@@ -253,6 +253,12 @@ const SurveyEditor = () => {
             >
               View Results
             </Link>
+            <Link
+              to={`/statistics/${surveyId}`}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-all duration-200"
+            >
+              Statistics
+            </Link>
             <button
               onClick={() => setShowPublishModal(true)}
               className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"

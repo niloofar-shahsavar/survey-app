@@ -11,6 +11,7 @@ import ContactUs from "./pages/ContactUs";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Results from "./pages/Results";
 import { ThemeProvider } from "./context/ThemeContext";
+import Statistics from "./pages/Statistics";
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="/editor/:surveyId" element={<SurveyEditor />} />
           <Route path="/survey/:surveyId" element={<SurveyResponse />} />
           <Route path="/results/:surveyId" element={<Results />} />
+          <Route path="statistics/:surveyId" element={<Statistics />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
