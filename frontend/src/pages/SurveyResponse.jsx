@@ -130,12 +130,6 @@ const SurveyResponse = () => {
           <p className="text-gray-400 dark:text-gray-500 text-sm mb-8">
             We appreciate your feedback and input.
           </p>
-          <button
-            onClick={() => (window.location.href = "/")}
-            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium transition-all duration-200 shadow-sm"
-          >
-            Back to Home
-          </button>
         </div>
       </div>
     );
