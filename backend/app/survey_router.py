@@ -268,3 +268,103 @@ def get_survey_responses(survey_id: int, db: Session = Depends(get_db), current_
         "total_responses": len(responses),
         "responses": formatted_responses
     }
+
+@router.get("/{survey_id}/statistics")
+def get_survey_statistics(survey_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Get survey with questions
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
+    responses = db.execute(
+        select(Response).where(Response.survey_id == survey_id)
+    ).scalars().all()
+
+    total_responses = len(responses)
+
+    if total_responses == 0:
+        return {
+            "survey_id": survey_id,
+            "survey_title": survey.title,
+            "total_responses": 0,
+            "questions": []
+        }
+
+    question_stats = []
+
+    for question in survey.questions:
+        answers = db.execute(
+            select(Answer).where(
+                Answer.question_id == question.id,
+                Answer.response_id.in_([r.id for r in responses])
+            )
+        ).scalars().all()
+
+        answer_texts = [a.answer_text for a in answers if a.answer_text]
+        stat = {
+            "question_id": question.id,
+            "text": question.text,
+            "type": question.type,
+            "options": question.options,
+            "required": question.required,
+            "total_answers": len(answer_texts),
+        }
+
+        if question.type == "rating":
+            numeric = [int(a) for a in answer_texts if a.isdigit()]
+            if numeric:
+                stat["average"] = round(sum(numeric) / len(numeric), 2)
+                stat["median"] = sorted(numeric)[len(numeric) // 2]
+                stat["distribution"] = {str(i): numeric.count(i) for i in range(1, 6)}
+            else:
+                stat["average"] = 0
+                stat["median"] = 0
+                stat["distribution"] = {str(i): 0 for i in range(1, 6)}
+
+        elif question.type == "multiple_choice":
+            option_counts = {}
+            if question.options:
+                for opt in question.options.split(","):
+                    opt = opt.strip()
+                    option_counts[opt] = sum(1 for a in answer_texts if a.strip() == opt)
+            stat["option_counts"] = option_counts
+            stat["option_percentages"] = {
+                k: round((v / len(answer_texts)) * 100, 1) if answer_texts else 0
+                for k, v in option_counts.items()
+            }
+
+        elif question.type == "multi_select":
+            option_counts = {}
+            if question.options:
+                for opt in question.options.split(","):
+                    opt = opt.strip()
+                    option_counts[opt] = sum(1 for a in answer_texts if opt in [x.strip() for x in a.split(",")])
+            stat["option_counts"] = option_counts
+            stat["option_percentages"] = {
+                k: round((v / len(answer_texts)) * 100, 1) if answer_texts else 0
+                for k, v in option_counts.items()
+            }
+
+        elif question.type == "text":
+            word_counts = [len(a.split()) for a in answer_texts]
+            stat["avg_word_count"] = round(sum(word_counts) / len(word_counts), 1) if word_counts else 0
+            stat["responses"] = answer_texts
+
+        question_stats.append(stat)
+
+    # Calculate overall stats
+    rating_questions = [q for q in question_stats if q["type"] == "rating" and q.get("average")]
+    overall_avg_rating = round(
+        sum(q["average"] for q in rating_questions) / len(rating_questions), 2
+    ) if rating_questions else None
+
+    return {
+        "survey_id": survey_id,
+        "survey_title": survey.title,
+        "total_responses": total_responses,
+        "overall_avg_rating": overall_avg_rating,
+        "questions": question_stats,
+    }
