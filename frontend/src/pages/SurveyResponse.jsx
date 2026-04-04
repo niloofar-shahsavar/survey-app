@@ -22,6 +22,9 @@ const SurveyResponse = () => {
           `http://127.0.0.1:8000/surveys/public/${surveyId}`,
         );
         if (!response.ok) {
+          if (response.status === 403) {
+            throw new Error("This survey is closed and no longer accepting responses.");
+          }
           throw new Error("Survey not found");
         }
         const data = await response.json();

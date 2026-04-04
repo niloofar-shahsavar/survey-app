@@ -11,6 +11,7 @@ class UserCreate(BaseModel):
 class SurveyCreate(BaseModel):
     title: str
     description: Optional[str] = None
+    is_active: Optional[bool] = True
 
 
 class QuestionCreate(BaseModel):

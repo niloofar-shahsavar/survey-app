@@ -10,6 +10,7 @@ function Dashboard() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [surveyToDelete, setSurveyToDelete] = useState(null);
   const [totalResponses, setTotalResponses] = useState(0);
+  const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -68,6 +69,47 @@ function Dashboard() {
       localStorage.removeItem("token_type");
       navigate("/");
     }
+  };
+
+  const handleToggleSurvey = async (survey) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(`http://localhost:8000/surveys/${survey.id}/toggle`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSurveys(surveys.map((s) => s.id === survey.id ? { ...s, is_active: data.is_active } : s));
+      }
+    } catch (err) {
+      console.error("Error toggling survey:", err);
+    }
+  };
+
+  const handleDuplicateSurvey = async (survey) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(`http://localhost:8000/surveys/${survey.id}/duplicate`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const newSurvey = await response.json();
+        setSurveys([...surveys, newSurvey]);
+        setTotalResponses((prev) => prev);
+      }
+    } catch (err) {
+      console.error("Error duplicating survey:", err);
+    }
+  };
+
+  const handleCopyLink = (surveyId) => {
+    const url = `${window.location.origin}/survey/${surveyId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(surveyId);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
   };
 
   const handleDeleteSurvey = async () => {
@@ -131,7 +173,7 @@ function Dashboard() {
           {[
             { value: surveys.length, label: "Total Surveys" },
             { value: totalResponses, label: "Total Responses" },
-            { value: surveys.filter((s) => s.questions_count > 0).length, label: "Active" },
+            { value: surveys.filter((s) => s.is_active).length, label: "Open" },
           ].map(({ value, label }) => (
             <div
               key={label}
@@ -151,24 +193,55 @@ function Dashboard() {
         ) : (
           <div className="space-y-3">
             {surveys.map((survey) => (
-              <Link
-                to={`/editor/${survey.id}`}
+              <div
                 key={survey.id}
                 className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-5 flex justify-between items-center hover:border-purple-300 dark:hover:border-purple-500/30 hover:shadow-md dark:hover:shadow-none transition-all duration-200 group"
               >
-                <div className="flex-1 min-w-0 mr-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                    {survey.title}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-500 text-sm truncate mt-0.5">
+                <Link to={`/editor/${survey.id}`} className="flex-1 min-w-0 mr-4">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                      {survey.title}
+                    </h3>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
+                      survey.is_active
+                        ? "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400"
+                        : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500"
+                    }`}>
+                      {survey.is_active ? "Open" : "Closed"}
+                    </span>
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-500 text-sm truncate">
                     {survey.description || "No description"}
                   </p>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
+                </Link>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={(e) => { e.preventDefault(); handleCopyLink(survey.id); }}
+                    className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                    title="Copy shareable link"
+                  >
+                    {copiedId === survey.id ? "Copied!" : "Copy Link"}
+                  </button>
+                  <button
+                    onClick={(e) => { e.preventDefault(); handleToggleSurvey(survey); }}
+                    className={`px-3 py-1.5 text-sm rounded-lg border transition-all duration-200 ${
+                      survey.is_active
+                        ? "text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-500/10"
+                        : "text-green-600 dark:text-green-400 border-green-200 dark:border-green-800/50 hover:bg-green-50 dark:hover:bg-green-500/10"
+                    }`}
+                  >
+                    {survey.is_active ? "Close" : "Open"}
+                  </button>
+                  <button
+                    onClick={(e) => { e.preventDefault(); handleDuplicateSurvey(survey); }}
+                    className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                    title="Duplicate survey"
+                  >
+                    Duplicate
+                  </button>
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      e.stopPropagation();
                       setSurveyToDelete(survey);
                       setShowDeleteModal(true);
                     }}
@@ -176,9 +249,9 @@ function Dashboard() {
                   >
                     Delete
                   </button>
-                  <div className="text-purple-400 group-hover:translate-x-0.5 transition-transform duration-200">→</div>
+                  <Link to={`/editor/${survey.id}`} className="text-purple-400 group-hover:translate-x-0.5 transition-transform duration-200">→</Link>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

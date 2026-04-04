@@ -40,6 +40,7 @@ def get_surveys(db: Session = Depends(get_db), current_user: User = Depends(get_
             "id": s.id,
             "title": s.title,
             "description": s.description,
+            "is_active": s.is_active,
             "questions_count": len(s.questions),
             "response_count": len(response_count)
         })
@@ -60,6 +61,7 @@ def get_survey(survey_id: int, db: Session = Depends(get_db), current_user: User
         "id": survey.id,
         "title": survey.title,
         "description": survey.description,
+        "is_active": survey.is_active,
         "questions": [{"id": q.id, "text": q.text, "type": q.type, "options": q.options, "required": q.required} for q in survey.questions]
     }
 
@@ -79,6 +81,48 @@ def update_survey(survey_id: int, survey_data: SurveyCreate, db: Session = Depen
     db.commit()
     db.refresh(survey)
     return survey
+
+
+@router.patch("/{survey_id}/toggle")
+def toggle_survey(survey_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    survey.is_active = not survey.is_active
+    db.commit()
+    db.refresh(survey)
+    return {"id": survey.id, "is_active": survey.is_active}
+
+
+@router.post("/{survey_id}/duplicate", status_code=201)
+def duplicate_survey(survey_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    original = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+    if not original:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    new_survey = Survey(
+        title=f"{original.title} (Copy)",
+        description=original.description,
+        is_active=False,
+        owner_id=current_user.id
+    )
+    db.add(new_survey)
+    db.flush()
+    for q in original.questions:
+        db.add(Question(text=q.text, type=q.type, options=q.options, required=q.required, survey_id=new_survey.id))
+    db.commit()
+    db.refresh(new_survey)
+    return {
+        "id": new_survey.id,
+        "title": new_survey.title,
+        "description": new_survey.description,
+        "is_active": new_survey.is_active,
+        "questions_count": len(original.questions),
+        "response_count": 0
+    }
 
 
 @router.delete("/{survey_id}", status_code=204)
@@ -189,6 +233,8 @@ def get_survey_public(survey_id: int, db: Session = Depends(get_db)):
     
     if not survey:
         raise HTTPException(status_code=404, detail="Survey not found")
+    if not survey.is_active:
+        raise HTTPException(status_code=403, detail="This survey is closed and no longer accepting responses")
     
     return {
         "id": survey.id,
@@ -208,6 +254,8 @@ def submit_survey_response(survey_id: int, response_data: SurveyResponseSubmit, 
     
     if not survey:
         raise HTTPException(status_code=404, detail="Survey not found")
+    if not survey.is_active:
+        raise HTTPException(status_code=403, detail="This survey is closed and no longer accepting responses")
     
     # Create response record
     new_response = Response(survey_id=survey_id)
@@ -258,7 +306,10 @@ def get_survey_responses(survey_id: int, db: Session = Depends(get_db), current_
                     "answer_text": ans.answer_text,
                     "question_text": db.execute(
                         select(Question).where(Question.id == ans.question_id)
-                    ).scalars().first().text
+                    ).scalars().first().text,
+                    "question_type": db.execute(
+                        select(Question).where(Question.id == ans.question_id)
+                    ).scalars().first().type
                 } for ans in answers
             ]
         })

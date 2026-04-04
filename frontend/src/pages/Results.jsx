@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
+} from "recharts";
 
 const Results = () => {
   const { surveyId } = useParams();
@@ -38,6 +41,40 @@ const Results = () => {
 
     fetchResults();
   }, [surveyId, navigate]);
+
+  // Build per-question summary for charts
+  const buildQuestionSummaries = () => {
+    if (!data || !data.responses.length) return [];
+    const questions = {};
+    data.responses.forEach((response) => {
+      response.answers.forEach((answer) => {
+        const qId = answer.question_id;
+        if (!questions[qId]) {
+          questions[qId] = {
+            id: qId,
+            text: answer.question_text || `Question ${qId}`,
+            type: answer.question_type || "text",
+            answers: [],
+          };
+        }
+        questions[qId].answers.push(answer.answer_text);
+      });
+    });
+    return Object.values(questions);
+  };
+
+  const buildChartData = (answers) => {
+    const counts = {};
+    answers.forEach((a) => {
+      const val = a || "(no answer)";
+      counts[val] = (counts[val] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  };
+
+  const COLORS = ["#9333ea", "#a855f7", "#c084fc", "#d8b4fe", "#7c3aed", "#6d28d9"];
+
+  const questionSummaries = buildQuestionSummaries();
 
   const exportToCSV = () => {
     if (!data || data.responses.length === 0) return;
@@ -127,32 +164,59 @@ const Results = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {data?.responses.map((response, index) => (
-              <div
-                key={response.id}
-                className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm dark:shadow-none hover:border-purple-300 dark:hover:border-purple-500/20 transition-all duration-200"
-              >
-                <p className="text-xs text-purple-600 dark:text-purple-400 font-medium uppercase tracking-wide mb-4">
-                  Response {index + 1}
-                </p>
-                <div className="space-y-4">
-                  {response.answers.map((answer, i) => (
-                    <div
-                      key={i}
-                      className="border-l-2 border-purple-200 dark:border-purple-500/30 pl-4"
-                    >
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">
-                        Question {answer.question_id}
-                      </p>
-                      <p className="text-gray-800 dark:text-gray-200">
-                        {answer.answer_text}
-                      </p>
+          <div className="space-y-6">
+            {questionSummaries.map((q, idx) => {
+              const isChoice = q.type === "multiple_choice" || q.type === "rating";
+              const chartData = buildChartData(q.answers);
+              return (
+                <div
+                  key={q.id}
+                  className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm dark:shadow-none"
+                >
+                  <p className="text-xs text-purple-600 dark:text-purple-400 font-medium uppercase tracking-wide mb-1">
+                    Question {idx + 1}
+                  </p>
+                  <p className="text-gray-900 dark:text-white font-medium mb-4">
+                    {q.text}
+                  </p>
+
+                  {isChoice ? (
+                    <div>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={chartData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                          <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#9ca3af" }} />
+                          <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#9ca3af" }} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#1f2937", border: "none", borderRadius: "8px", color: "#f9fafb" }}
+                            cursor={{ fill: "rgba(147,51,234,0.1)" }}
+                          />
+                          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                            {chartData.map((_, i) => (
+                              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {chartData.map((item, i) => (
+                          <span key={i} className="text-xs px-2 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300">
+                            {item.name}: {item.value}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="space-y-2">
+                      {q.answers.map((ans, i) => (
+                        <div key={i} className="border-l-2 border-purple-200 dark:border-purple-500/30 pl-3 py-0.5">
+                          <p className="text-gray-700 dark:text-gray-300 text-sm">{ans || <span className="text-gray-400 italic">No answer</span>}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
