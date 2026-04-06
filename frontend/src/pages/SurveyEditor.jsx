@@ -16,6 +16,8 @@ const SurveyEditor = () => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [editRequired, setEditRequired] = useState(true);
+  const [editType, setEditType] = useState("text");
+  const [editOptions, setEditOptions] = useState("");
   const [copied, setCopied] = useState(false);
   const [aiGoal, setAiGoal] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -121,20 +123,26 @@ const SurveyEditor = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ text: editText, required: editRequired }),
+          body: JSON.stringify({
+            text: editText,
+            type: editType,
+            options: (editType === "multiple_choice" || editType === "multi_select") ? editOptions || null : null,
+            required: editRequired,
+          }),
         },
       );
 
       if (response.ok) {
+        const updated = await response.json();
         setQuestions(
           questions.map((q) =>
-            q.id === questionId
-              ? { ...q, text: editText, required: editRequired }
-              : q,
+            q.id === questionId ? { ...q, text: updated.text, type: updated.type, options: updated.options, required: updated.required } : q,
           ),
         );
         setEditingId(null);
         setEditText("");
+        setEditType("text");
+        setEditOptions("");
       }
     } catch (err) {
       console.error("Error editing question:", err);
@@ -296,21 +304,42 @@ const SurveyEditor = () => {
                     onChange={(e) => setEditText(e.target.value)}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
                   />
-                  <div className="flex items-center gap-2 mt-2">
-                    <input
-                      type="checkbox"
-                      id={`required-${question.id}`}
-                      checked={editRequired}
-                      onChange={(e) => setEditRequired(e.target.checked)}
-                      className="w-4 h-4 text-purple-600 rounded"
-                    />
-                    <label
-                      htmlFor={`required-${question.id}`}
-                      className="text-sm text-gray-600 dark:text-gray-400"
+                  <div className="flex items-center gap-3 mt-2">
+                    <select
+                      value={editType}
+                      onChange={(e) => setEditType(e.target.value)}
+                      className="px-3 py-2 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg focus:outline-none focus:border-purple-500 text-sm transition-all duration-200"
                     >
-                      Required
-                    </label>
+                      <option value="text">Text</option>
+                      <option value="rating">Rating</option>
+                      <option value="multiple_choice">Multiple Choice</option>
+                      <option value="multi_select">Multi Select</option>
+                    </select>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={`required-${question.id}`}
+                        checked={editRequired}
+                        onChange={(e) => setEditRequired(e.target.checked)}
+                        className="w-4 h-4 text-purple-600 rounded"
+                      />
+                      <label
+                        htmlFor={`required-${question.id}`}
+                        className="text-sm text-gray-600 dark:text-gray-400"
+                      >
+                        Required
+                      </label>
+                    </div>
                   </div>
+                  {(editType === "multiple_choice" || editType === "multi_select") && (
+                    <input
+                      type="text"
+                      placeholder="Options (comma-separated): Option A, Option B, Option C"
+                      value={editOptions}
+                      onChange={(e) => setEditOptions(e.target.value)}
+                      className="w-full mt-2 px-3 py-2 bg-white dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400 dark:placeholder-gray-600 text-sm transition-all duration-200"
+                    />
+                  )}
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => handleEditQuestion(question.id)}
@@ -322,6 +351,8 @@ const SurveyEditor = () => {
                       onClick={() => {
                         setEditingId(null);
                         setEditText("");
+                        setEditType("text");
+                        setEditOptions("");
                       }}
                       className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
                     >
@@ -345,6 +376,18 @@ const SurveyEditor = () => {
                       <p className="text-gray-800 dark:text-gray-200">
                         {question.text}
                       </p>
+                      {question.options && (question.type === "multiple_choice" || question.type === "multi_select") && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {question.options.split(",").map((opt, i) => (
+                            <span
+                              key={i}
+                              className="px-2.5 py-1 text-xs bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/20 rounded-full"
+                            >
+                              {opt.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -353,6 +396,8 @@ const SurveyEditor = () => {
                         setEditingId(question.id);
                         setEditText(question.text);
                         setEditRequired(question.required);
+                        setEditType(question.type || "text");
+                        setEditOptions(question.options || "");
                       }}
                       className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
                     >

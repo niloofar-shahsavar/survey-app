@@ -173,6 +173,8 @@ def update_question(survey_id: int, question_id: int, question_data: QuestionCre
         raise HTTPException(status_code=404, detail="Question not found")
     
     question.text = question_data.text
+    question.type = question_data.type
+    question.options = question_data.options
     question.required = question_data.required
     db.commit()
     db.refresh(question)
