@@ -43,6 +43,13 @@ const SurveyResponse = () => {
   const handleAnswerChange = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
+
+  const handleSingleSelectToggle = (questionId, value) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: prev[questionId] === value ? "" : value,
+    }));
+  };
  
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -201,7 +208,10 @@ const SurveyResponse = () => {
                         key={num}
                         type="button"
                         onClick={() =>
-                          handleAnswerChange(question.id, num.toString())
+                          handleSingleSelectToggle(
+                            question.id,
+                            num.toString(),
+                          )
                         }
                         className={`w-11 h-11 rounded-lg text-base font-bold transition-all duration-200 ${
                           answers[question.id] === num.toString()
@@ -232,6 +242,12 @@ const SurveyResponse = () => {
                           name={`question-${question.id}`}
                           value={option.trim()}
                           checked={answers[question.id] === option.trim()}
+                          onClick={(e) => {
+                            if (answers[question.id] === option.trim()) {
+                              e.preventDefault();
+                              handleAnswerChange(question.id, "");
+                            }
+                          }}
                           onChange={(e) =>
                             handleAnswerChange(question.id, e.target.value)
                           }
