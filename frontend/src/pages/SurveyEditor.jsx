@@ -20,6 +20,7 @@ const SurveyEditor = () => {
   const [aiGoal, setAiGoal] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -44,6 +45,7 @@ const SurveyEditor = () => {
         const data = await response.json();
         setSurvey(data);
         setQuestions(data.questions || []);
+        setIsPublished(Boolean(data.published || data.is_published));
       } catch (err) {
         console.error("Error fetching survey:", err);
       } finally {
@@ -205,6 +207,11 @@ const SurveyEditor = () => {
     }
   };
 
+  const handlePublish = () => {
+    setIsPublished(true);
+    setShowPublishModal(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-200 flex items-center justify-center">
@@ -241,12 +248,14 @@ const SurveyEditor = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={handleShareLink}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-all duration-200"
-            >
-              {copied ? "Copied!" : "Share Link"}
-            </button>
+            {isPublished && (
+              <button
+                onClick={handleShareLink}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-all duration-200"
+              >
+                {copied ? "Copied!" : "Share Link"}
+              </button>
+            )}
             <Link
               to={`/results/${surveyId}`}
               className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-all duration-200"
@@ -260,10 +269,14 @@ const SurveyEditor = () => {
               Statistics
             </Link>
             <button
-              onClick={() => setShowPublishModal(true)}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+              onClick={handlePublish}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${
+                isPublished
+                  ? "bg-green-600 hover:bg-green-500 text-white"
+                  : "bg-purple-600 hover:bg-purple-500 text-white"
+              }`}
             >
-              Publish
+              {isPublished ? "Published" : "Publish"}
             </button>
           </div>
         </div>
