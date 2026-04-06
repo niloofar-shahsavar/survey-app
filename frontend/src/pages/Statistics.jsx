@@ -32,6 +32,17 @@ const Statistics = () => {
 
         const result = await response.json();
         setData(result);
+        // Load saved AI analysis
+        const aiResponse = await fetch(
+          `${API_BASE}/ai/${surveyId}/ai-analysis`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (aiResponse.ok) {
+          const aiResult = await aiResponse.json();
+          if (aiResult.analysis) {
+            setAiData(aiResult.analysis);
+          }
+        }
       } catch (err) {
         console.error("Error fetching statistics:", err);
       } finally {
@@ -46,10 +57,10 @@ const Statistics = () => {
     setAiLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const response = await fetch(
-        `${API_BASE}/ai/${surveyId}/ai-analysis`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const response = await fetch(`${API_BASE}/ai/${surveyId}/ai-analysis`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (response.ok) {
         const result = await response.json();
         setAiData(result.analysis);

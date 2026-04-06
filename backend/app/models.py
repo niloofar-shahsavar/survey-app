@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Boolean, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from .database import Base
 
 
@@ -27,6 +28,7 @@ class Survey(Base):
     owner = relationship("User", back_populates="surveys")
     questions = relationship("Question", back_populates="survey")
     responses = relationship("Response", back_populates="survey")
+    analysis = relationship("Analysis", back_populates="survey", uselist=False)
 
 
 class Question(Base):
@@ -34,7 +36,7 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String, nullable=False)
-    type = Column(String, default="text")
+    type = Column(String, default="text", nullable = False)
     options = Column(String, nullable=True)
     required = Column(Boolean, default=True)
 
@@ -75,3 +77,13 @@ class Token(Base):
     token = Column(String, unique=True, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="tokens")
+
+class Analysis(Base):
+    __tablename__ = "analyses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    survey_id = Column(Integer, ForeignKey("surveys.id"), unique=True)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    survey = relationship("Survey", back_populates="analysis")

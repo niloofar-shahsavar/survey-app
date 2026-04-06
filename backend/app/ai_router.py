@@ -4,8 +4,9 @@ from pydantic import BaseModel
 import os
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from .models import Survey, User, Response, Answer
+from .models import Survey, User, Response, Answer, Analysis
 from .security import get_db, get_current_user
+
 
 load_dotenv()
 
@@ -67,6 +68,27 @@ def get_ai_analysis(survey_id: int, db: Session = Depends(get_db), current_user:
     if not survey:
         raise HTTPException(status_code=404, detail="Survey not found")
 
+    # Check if saved analysis exists
+    existing = db.execute(
+        select(Analysis).where(Analysis.survey_id == survey_id)
+    ).scalars().first()
+
+    if existing:
+        import json
+        return {"analysis": json.loads(existing.content), "saved": True, "created_at": str(existing.created_at)}
+
+    return {"analysis": None, "saved": False}
+
+
+@router.post("/{survey_id}/ai-analysis")
+def generate_ai_analysis(survey_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    survey = db.execute(
+        select(Survey).where(Survey.id == survey_id, Survey.owner_id == current_user.id)
+    ).scalars().first()
+
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
     responses = db.execute(
         select(Response).where(Response.survey_id == survey_id)
     ).scalars().all()
@@ -98,10 +120,10 @@ def get_ai_analysis(survey_id: int, db: Session = Depends(get_db), current_user:
 
     survey_data = "\n".join(summary_parts)
 
-    # Send to Gemini
     try:
         import google.generativeai as genai
         import os
+        import json
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         model = genai.GenerativeModel('gemini-2.5-flash-lite')
 
@@ -121,13 +143,25 @@ Provide your analysis in this exact JSON format (return ONLY valid JSON, no mark
         response = model.generate_content(prompt)
         result_text = response.text.strip()
 
-        # Clean markdown if present
         if result_text.startswith("```"):
             result_text = result_text.replace("```json", "").replace("```", "").strip()
 
-        import json
         analysis = json.loads(result_text)
-        return {"analysis": analysis}
+
+        # Save to database
+        existing = db.execute(
+            select(Analysis).where(Analysis.survey_id == survey_id)
+        ).scalars().first()
+
+        if existing:
+            existing.content = json.dumps(analysis)
+        else:
+            new_analysis = Analysis(survey_id=survey_id, content=json.dumps(analysis))
+            db.add(new_analysis)
+
+        db.commit()
+
+        return {"analysis": analysis, "saved": True}
 
     except Exception as e:
         return {"analysis": None, "error": str(e)}
