@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import HeroBackground from "../components/HeroBackground.jsx";
 import Footer from "../components/Footer.jsx";
